@@ -1,6 +1,8 @@
 
 
-<img width="900" alt="Trilingo-Logo" src="https://github.com/InsaneCoder789/Trilingo/assets/83532283/5d09560d-edb8-4831-943e-2907d729fbc3">
+<img width="1000" alt="Trilingo-Logo" src="https://github.com/InsaneCoder789/Trilingo/assets/83532283/5d09560d-edb8-4831-943e-2907d729fbc3">
+
+
 
 
 Trilingo is your ultimate travel companion that aims to make your travel experience seamless and enjoyable. This application provides personalized travel planning, real-time language translation, local recommendations, health monitoring, and much more. Get ready for an unforgettable journey with Trilingo!
