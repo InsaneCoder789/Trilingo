@@ -1,0 +1,19 @@
+name: trilingo
+description: A Flutter app for Trilingo
+version: 1.0.0
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.3
+
+  http: ^0.13.3
+  provider: ^5.0.0
+  # Add other dependencies here
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
