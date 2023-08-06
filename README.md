@@ -39,11 +39,16 @@ Trilingo is your go-to travel app that promises to be your ultimate travel compa
 To get started with Trilingo, simply download the app from the App Store or Google Play Store, and sign in with your Google Account to access the full range of features. Once you're logged in, you can start planning your next adventure with personalized flight and hotel options, discover exciting places to eat, and create a personalized travel itinerary.
 
 
-##Technologies Used
-Flutter: Cross-platform UI toolkit for building natively compiled applications.
-Firebase: Backend-as-a-Service platform for authentication, database, and cloud storage.
-Contributing
+## Technologies Used
+```
+- Flutter: Cross-platform UI toolkit for building natively compiled applications.
+- Firebase: Backend-as-a-Service platform for authentication, database, and cloud storage.
+  ```
+
+
+## Contributing
 We welcome contributions from the community! If you'd like to contribute to Trilingo, please follow these steps:
+
 ```
 Fork the repository.
 Create a new branch for your feature or bug fix.
@@ -52,18 +57,14 @@ Push your changes to your forked repository.
 Submit a pull request to the main repository, explaining your changes.
 Our team will review your pull request and merge it if everything looks good!
 ```
-##Issues
+
+## Issues
 If you encounter any issues or bugs, please submit them here.
 
-##License
+## License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-##Contact
+## Contact
 [InsaneCoder789](https://github.com/InsaneCoder789)
-Optional: Any other contact information or social media profiles.
-
-
-##Acknowledgments
-Special thanks to the Flutter and Firebase communities for their incredible tools and resources, making Trilingo possible.
 
 Start your journey with Trilingo today and experience the joy of seamless, personalized travel planning and exploration! Happy travels! 🌍✈️🏝️
