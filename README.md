@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 <meta property="og:image" content="appbanner.png">
 <meta property="og:image:secure_url" content="appbanner.png">
 <meta property="og:image:width" content="1200">
