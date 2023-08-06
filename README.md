@@ -70,5 +70,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 Start your journey with Trilingo today and experience the joy of seamless, personalized travel planning and exploration! Happy travels! 🌍✈️🏝️
 
 
-![image](https://github.com/InsaneCoder789/Trilingo/assets/83532283/8a1908d9-baee-4a19-8158-b47474e2d61a)
+![image](https://github.com/InsaneCoder789/Trilingo/assets/83532283/5369e542-1bdc-491a-bd0b-6cebee638a0b)
+
 
