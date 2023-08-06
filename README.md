@@ -71,6 +71,6 @@ Start your journey with Trilingo today and experience the joy of seamless, perso
 
 
 
-![378-3788920_website-is-currently-under-construction-png-download-website](https://github.com/InsaneCoder789/Trilingo/assets/83532283/64e8b4f2-a51f-4b6c-87cb-316ace9159a0)
+![image](https://github.com/InsaneCoder789/Trilingo/assets/83532283/0a570761-81f0-4ac3-b36f-81b569022992)
 
 
