@@ -1,6 +1,6 @@
 
-<meta property="og:image" content="![image](https://github.com/InsaneCoder789/Trilingo/assets/83532283/04efa7e7-62c2-40bb-b061-b2636d02e7d4)">
-<meta property="og:image:secure_url" content="![image](https://github.com/InsaneCoder789/Trilingo/assets/83532283/6e5da1b3-c772-4936-9a53-945bfd962a23)">
+<meta property="og:image" content= "https://github.com/InsaneCoder789/Trilingo/blob/master/appbanner.png">
+<meta property="og:image:secure_url" content="https://github.com/InsaneCoder789/Trilingo/blob/master/appbanner.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
