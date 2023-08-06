@@ -9,9 +9,11 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.3
-
+  firebase_auth: ^4.7.2
   http: ^0.13.3
   provider: ^5.0.0
+  firebase_core: ^2.15.0
+  google_sign_in: ^6.1.4
   # Add other dependencies here
 
 dev_dependencies:
