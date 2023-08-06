@@ -1,4 +1,12 @@
+<<<<<<< HEAD
+<meta property="og:image" content="appbanner.png">
+<meta property="og:image:secure_url" content="appbanner.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
 # TRILINGO - Your Ultimate Travel Companion
+
+>>>>>>> e17cb57 (New Github Changes)
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Stars](https://img.shields.io/github/stars/your-username/your-repo.svg)](https://github.com/InsaneCoder789/Trilingo/stargazers)
