@@ -20,6 +20,11 @@ dependencies:
 flutter:
   assets:
     - assets/images/Trilingo-image.png
+    - assets/images/hotel_booking.png
+    - assets/images/language_translator.png
+    - assets/images/food_beverages.png
+    - assets/images/flight_booking.png
+
     # Add other asset paths here
 
 dev_dependencies:

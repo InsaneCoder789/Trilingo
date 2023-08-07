@@ -24,8 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trilingo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue, scaffoldBackgroundColor: Colors.black),
       home: ImageSplashScreen(
         googleSignIn: googleSignIn,
       ),
@@ -51,8 +50,8 @@ class _ImageSplashScreenState extends State<ImageSplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Delay the splash screen for 4 seconds
-    Future.delayed(Duration(seconds: 4), () {
+    // Delay the splash screen for 2 seconds
+    Future.delayed(Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
