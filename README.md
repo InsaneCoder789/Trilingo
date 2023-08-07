@@ -12,7 +12,7 @@
 
 **Currently Under Development 🚧**
 
-<img width="1000" alt="Trilingo-Logo" src="trilingo-logo.png">
+<img width="1000" alt="Trilingo-Logo" src="github-banner.png">
 
 
 ## Description
