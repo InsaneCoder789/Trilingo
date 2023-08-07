@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
 import 'home.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,19 +18,60 @@ class MyApp extends StatelessWidget {
   final GoogleSignIn googleSignIn;
 
   MyApp({required this.googleSignIn});
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login and Signup Pages',
+      title: 'Trilingo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
+      home: ImageSplashScreen(
+        googleSignIn: googleSignIn,
+      ),
       routes: {
-        '/': (context) => LoginPage(googleSignIn: googleSignIn),
         '/signup': (context) => SignupPage(googleSignIn: googleSignIn),
-        '/home': (context) => HomePage(
-            name: ModalRoute.of(context)?.settings.arguments as String),
+        '/home': (context) =>
+            HomePage(user: ModalRoute.of(context)?.settings.arguments as User?),
       },
+    );
+  }
+}
+
+class ImageSplashScreen extends StatefulWidget {
+  final GoogleSignIn googleSignIn;
+
+  ImageSplashScreen({required this.googleSignIn});
+
+  @override
+  _ImageSplashScreenState createState() => _ImageSplashScreenState();
+}
+
+class _ImageSplashScreenState extends State<ImageSplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Delay the splash screen for 4 seconds
+    Future.delayed(Duration(seconds: 4), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginPage(googleSignIn: widget.googleSignIn),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black, // Set the background color
+      child: Center(
+        child: Image.asset(
+          'assets/images/Trilingo-image.png', // Replace with your image file path
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 }
