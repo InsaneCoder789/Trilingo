@@ -7,8 +7,8 @@
 # TRILINGO - Your Ultimate Travel Companion
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Stars](https://img.shields.io/github/stars/your-username/your-repo.svg)](https://github.com/InsaneCoder789/Trilingo/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/your-username/your-repo.svg)](https://github.com/InsaneCoder789/Trilingo/network)
+[![GitHub Stars](https://img.shields.io/github/stars/InsaneCoder789/Trilingo.svg)](https://github.com/InsaneCoder789/Trilingo/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/InsaneCoder789/Trilingo.svg)](https://github.com/InsaneCoder789/Trilingo/network)
 
 **Currently Under Development 🚧**
 
