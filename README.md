@@ -1,6 +1,6 @@
 
-<meta property="og:image" content= "https://github.com/InsaneCoder789/Trilingo/blob/master/appbanner.png">
-<meta property="og:image:secure_url" content="https://github.com/InsaneCoder789/Trilingo/blob/master/appbanner.png">
+<meta property="og:image" content= "https://github.com/InsaneCoder789/Trilingo/blob/master/github-banner.png">
+<meta property="og:image:secure_url" content="https://github.com/InsaneCoder789/Trilingo/blob/master/github-banner.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
