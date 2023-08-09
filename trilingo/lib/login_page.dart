@@ -84,7 +84,15 @@ class LoginPage extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: Colors.black,
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(20.0), // Rounded edges
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                  offset: Offset(0, 4), // Shadow position
+                ),
+              ],
             ),
             padding: EdgeInsets.all(20.0),
             child: Column(
@@ -100,12 +108,12 @@ class LoginPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
                 TextField(
                   controller: emailController,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    labelText: 'Username',
+                    labelText: 'Username or Email',
                     labelStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
@@ -117,7 +125,6 @@ class LoginPage extends StatelessWidget {
                 TextField(
                   controller: passwordController,
                   style: TextStyle(color: Colors.white),
-                  obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: Colors.white),
@@ -128,35 +135,55 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          loginUser(context, emailController.text,
-                              passwordController.text);
-                        },
-                        child: Text('Login'),
-                      ),
+                ElevatedButton(
+                  onPressed: () {
+                    loginUser(
+                        context, emailController.text, passwordController.text);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.deepPurple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Navigate to the signup page
-                          Navigator.pushNamed(context, '/signup');
-                        },
-                        child: Text('Signup'),
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text('Login'),
+                  ),
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
+                    // Navigate to the signup page
+                    Navigator.pushNamed(context, '/signup');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.grey[700],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text('Signup'),
+                  ),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: () {
                     _handleGoogleSignIn(context);
                   },
-                  child: Text('Login with Google'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: Icon(
+                    Icons.account_circle_outlined,
+                    color: Colors.white,
+                  ),
+                  label: Text('Login with Google'),
                 ),
               ],
             ),

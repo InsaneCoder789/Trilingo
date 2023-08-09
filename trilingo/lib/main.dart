@@ -9,8 +9,7 @@ import 'package:firebase_core/firebase_core.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  final GoogleSignIn _googleSignIn =
-      GoogleSignIn(); // Create an instance of GoogleSignIn
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   runApp(MyApp(googleSignIn: _googleSignIn));
 }
 
@@ -24,7 +23,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trilingo',
       theme: ThemeData(
-          primarySwatch: Colors.blue, scaffoldBackgroundColor: Colors.black),
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.blueGrey,
+      ),
       home: ImageSplashScreen(
         googleSignIn: googleSignIn,
       ),
@@ -64,10 +65,10 @@ class _ImageSplashScreenState extends State<ImageSplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black, // Set the background color
+      color: Colors.deepPurpleAccent, // Updated background color
       child: Center(
         child: Image.asset(
-          'assets/images/Trilingo-image.png', // Replace with your image file path
+          'assets/images/Trilingo-image.png',
           fit: BoxFit.cover,
         ),
       ),

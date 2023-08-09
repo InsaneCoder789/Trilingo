@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_options.dart';
 import 'profile_page.dart';
+import 'package:trilingo/home_widgets/flight_bookings_page.dart';
+import 'package:trilingo/home_widgets/food_beverages_page.dart';
+import 'package:trilingo/home_widgets/hotel_bookings_page.dart';
+import 'package:trilingo/home_widgets/language_translator_page.dart';
 
 class HomePage extends StatelessWidget {
   final User? user;
@@ -15,7 +18,7 @@ class HomePage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Trilingo'),
-          backgroundColor: Colors.deepPurple,
+          backgroundColor: Colors.deepOrangeAccent,
         ),
         drawer: Drawer(
           child: ListView(
@@ -28,7 +31,7 @@ class HomePage extends StatelessWidget {
                   backgroundImage: NetworkImage(user?.photoURL ?? ''),
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple,
+                  color: Colors.deepPurpleAccent,
                 ),
               ),
               ListTile(
@@ -71,39 +74,11 @@ class HomePage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color:
-                        Colors.amber, // Set the widget box color to dark purple
-                    borderRadius: BorderRadius.circular(12), // Rounded edges
-                  ),
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/flight_booking.png',
-                        height: 120, // Adjust image size
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Flight Bookings',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white, // Set text color to white
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Book your flights with ease and discover exciting destinations.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white, // Set text color to white
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                child: _buildCategoryContainer(
+                  'assets/images/flight_booking.png',
+                  'Flight Bookings',
+                  'Book your flights with ease and discover exciting destinations.',
+                  Colors.amber,
                 ),
               ),
               SizedBox(height: 20),
@@ -117,39 +92,11 @@ class HomePage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors
-                        .blueAccent, // Set the widget box color to dark purple
-                    borderRadius: BorderRadius.circular(12), // Rounded edges
-                  ),
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/hotel_booking.png',
-                        height: 120, // Adjust image size
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Hotel Bookings',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white, // Set text color to white
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Find the perfect hotels for your stay and enjoy a comfortable experience.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white, // Set text color to white
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                child: _buildCategoryContainer(
+                  'assets/images/hotel_booking.png',
+                  'Hotel Bookings',
+                  'Find the perfect hotels for your stay and enjoy a comfortable experience.',
+                  Colors.blueAccent,
                 ),
               ),
               SizedBox(height: 20),
@@ -163,39 +110,11 @@ class HomePage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors
-                        .tealAccent, // Set the widget box color to dark purple
-                    borderRadius: BorderRadius.circular(12), // Rounded edges
-                  ),
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/language_translator.png',
-                        height: 120, // Adjust image size
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Language Translator',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white, // Set text color to white
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Translate between different languages and communicate effortlessly.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white, // Set text color to white
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                child: _buildCategoryContainer(
+                  'assets/images/language_translator.png',
+                  'Language Translator',
+                  'Translate between different languages and communicate effortlessly.',
+                  Colors.redAccent,
                 ),
               ),
               SizedBox(height: 20),
@@ -209,39 +128,11 @@ class HomePage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors
-                        .deepOrangeAccent, // Set the widget box color to dark purple
-                    borderRadius: BorderRadius.circular(12), // Rounded edges
-                  ),
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/food_beverages.png',
-                        height: 120, // Adjust image size
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Food and Beverages',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white, // Set text color to white
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Explore a variety of delicious cuisines and quench your thirst with refreshing drinks.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white, // Set text color to white
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                child: _buildCategoryContainer(
+                  'assets/images/food_beverages.png',
+                  'Food and Beverages',
+                  'Explore a variety of delicious cuisines and quench your thirst with refreshing drinks.',
+                  Colors.orangeAccent,
                 ),
               ),
             ],
@@ -250,64 +141,40 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-}
 
-// Create separate pages for each widget
-class FlightBookingsPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Flight Bookings'),
-        backgroundColor: Colors.deepPurple,
+  Container _buildCategoryContainer(
+      String imagePath, String title, String description, Color color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
       ),
-      body: Center(
-        child: Text('This page is for Flight Bookings'),
-      ),
-    );
-  }
-}
-
-class HotelBookingsPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Hotel Bookings'),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Center(
-        child: Text('This page is for Hotel Bookings'),
-      ),
-    );
-  }
-}
-
-class LanguageTranslatorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Language Translator'),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Center(
-        child: Text('This page is for Language Translator'),
-      ),
-    );
-  }
-}
-
-class FoodBeveragesPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Food and Beverages'),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Center(
-        child: Text('This page is for Food and Beverages'),
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Image.asset(
+            imagePath,
+            height: 120,
+          ),
+          SizedBox(height: 16),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            description,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

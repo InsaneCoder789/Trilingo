@@ -24,6 +24,13 @@ flutter:
     - assets/images/language_translator.png
     - assets/images/food_beverages.png
     - assets/images/flight_booking.png
+    - android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+    - android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+    - android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+    - android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+    - android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+    - ios/Runner/Assets.xcassets/AppIcon.appiconset/
+
 
     # Add other asset paths here
 
