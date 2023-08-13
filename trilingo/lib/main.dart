@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'login_page.dart';
 import 'signup_page.dart';
 import 'home.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:trilingo/welcome_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,18 +19,19 @@ class MyApp extends StatelessWidget {
   MyApp({required this.googleSignIn});
 
   @override
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Trilingo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.blueGrey,
+        scaffoldBackgroundColor: Colors.blueAccent,
       ),
-      home: ImageSplashScreen(
-        googleSignIn: googleSignIn,
-      ),
+      initialRoute: '/', // Set the initial route
       routes: {
-        '/signup': (context) => SignupPage(googleSignIn: googleSignIn),
+        '/': (context) => ImageSplashScreen(googleSignIn: googleSignIn),
+        '/welcome': (context) => WelcomePage(googleSignIn: googleSignIn),
+        '/signup': (context) => SignupPage(),
         '/home': (context) =>
             HomePage(user: ModalRoute.of(context)?.settings.arguments as User?),
       },
@@ -56,7 +57,7 @@ class _ImageSplashScreenState extends State<ImageSplashScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => LoginPage(googleSignIn: widget.googleSignIn),
+          builder: (context) => WelcomePage(googleSignIn: widget.googleSignIn),
         ),
       );
     });

@@ -10,14 +10,23 @@ dependencies:
     sdk: flutter
   video_player: ^2.2.5
   cupertino_icons: ^1.0.3
-  firebase_auth: ^4.7.2
-  http: ^0.13.3
-  provider: ^5.0.0
-  firebase_core: ^2.15.0
+  http: ^1.1.0
+  provider: ^6.0.5
   google_sign_in: ^6.1.4
+  flow_builder: ^0.0.9
+  line_icons: ^2.0.1
+  firebase_core: ^2.15.0
+  firebase_auth: ^4.7.2
+  image_picker: ^1.0.2
+  animated_bottom_navigation_bar: ^1.1.0+1
+ 
+
+
+  
   # Add other dependencies here
 
 flutter:
+  uses-material-design: true
   assets:
     - assets/images/Trilingo-image.png
     - assets/images/hotel_booking.png
@@ -30,6 +39,9 @@ flutter:
     - android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
     - android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
     - ios/Runner/Assets.xcassets/AppIcon.appiconset/
+    - assets/images/49svh_2.png
+    - assets/images/welcome_image.png
+    - assets/images/ai_chatbot.png
 
 
     # Add other asset paths here
@@ -37,3 +49,8 @@ flutter:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+fonts:
+  - family: MaterialIcons
+    fonts:
+      - asset: fonts/MaterialIcons-Regular.ttf    

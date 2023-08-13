@@ -77,115 +77,144 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(20.0), // Rounded edges
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                  offset: Offset(0, 4), // Shadow position
-                ),
-              ],
-            ),
-            padding: EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Login',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+      backgroundColor: Color.fromARGB(255, 146, 238, 188),
+      body: Container(
+        decoration: BoxDecoration(
+          color: Color.fromRGBO(255, 255, 255, 0.8), // Translucent white color
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              height: 520,
+              width: 350,
+              padding: EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
                   ),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: emailController,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: 'Username or Email',
-                    labelStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                      borderRadius: BorderRadius.circular(5.0),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Logo
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                            'assets/images/welcome_image.png'), // Your logo image
+                        fit: BoxFit.cover,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: passwordController,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                      borderRadius: BorderRadius.circular(5.0),
+                  SizedBox(height: 20),
+                  Text(
+                    'Welcome Back!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF05386B),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    loginUser(
-                        context, emailController.text, passwordController.text);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.deepPurple,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: emailController,
+                    style: TextStyle(color: Colors.black),
+                    decoration: InputDecoration(
+                      labelText: 'Username or Email',
+                      labelStyle: TextStyle(color: Colors.black),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text('Login'),
-                  ),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    // Navigate to the signup page
-                    Navigator.pushNamed(context, '/signup');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.grey[700],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: passwordController,
+                    style: TextStyle(color: Colors.black),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(color: Colors.black),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text('Signup'),
-                  ),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    _handleGoogleSignIn(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.red,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      loginUser(context, emailController.text,
+                          passwordController.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFF05386B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 20, horizontal: 100),
+                    ),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
-                  icon: Icon(
-                    Icons.account_circle_outlined,
-                    color: Colors.white,
+                  SizedBox(height: 20),
+                  Text(
+                    'OR',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF05386B),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  label: Text('Login with Google'),
-                ),
-              ],
+                  SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      _handleGoogleSignIn(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                    ),
+                    icon: Icon(Icons.account_circle_outlined),
+                    label: Text(
+                      'Continue with Google',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

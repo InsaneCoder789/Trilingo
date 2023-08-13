@@ -1,47 +1,291 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   final User? user;
 
   ProfilePage({this.user});
 
   @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String _displayName = '';
+  String _email = '';
+  String _dob = '';
+  String _gender = '';
+
+  @override
+  void initState() {
+    _displayName = widget.user?.displayName ?? 'Guest';
+    _email = widget.user?.email ?? 'guest@example.com';
+    _dob = 'July 1, 1990';
+    _gender = 'Male';
+    super.initState();
+  }
+
+  void _showUpdateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          child: SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    initialValue: _displayName,
+                    onChanged: (value) {
+                      setState(() {
+                        _displayName = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Display Name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    initialValue: _email,
+                    onChanged: (value) {
+                      setState(() {
+                        _email = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Date of Birth',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  InkWell(
+                    onTap: () async {
+                      // Show date picker and update date of birth
+                    },
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today),
+                          SizedBox(width: 8),
+                          Text(
+                            "July 1, 1990",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Gender',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  DropdownButton<String>(
+                    value: 'Male',
+                    onChanged: (value) {
+                      setState(() {
+                        _gender = value!;
+                      });
+                    },
+                    items: <String>['Male', 'Female', 'Other']
+                        .map<DropdownMenuItem<String>>(
+                      (String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      },
+                    ).toList(),
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // Update user profile with the new information
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Save',
+                          style: TextStyle(
+                            color: Color(0xFF001489),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black, // Set the background color to black
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFC2E2FF), Color(0xFFC2E2FF)],
+        ),
+      ),
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: Text('User Profile'),
-          backgroundColor: Colors.deepPurple,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         ),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                backgroundImage: NetworkImage(user?.photoURL ?? ''),
-                radius: 60,
-              ),
-              SizedBox(height: 20),
-              Text(
-                user?.displayName ?? 'Guest',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // Set text color to white
+          child: Container(
+            height: 440,
+            width: 320,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.4),
+                  blurRadius: 12,
+                  offset: Offset(0, 8),
                 ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                user?.email ?? 'guest@example.com',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.4),
+                            blurRadius: 12,
+                            offset: Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        backgroundImage:
+                            NetworkImage(widget.user?.photoURL ?? ''),
+                        radius: 80,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle updating profile image
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: CircleBorder(),
+                          padding: EdgeInsets.all(16),
+                          primary: Color(0xFF001489),
+                          elevation: 8,
+                        ),
+                        child: Icon(Icons.camera_alt, color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              // Add more user information fields as needed
-            ],
+                SizedBox(height: 20),
+                Text(
+                  _displayName,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  _email,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Date of Birth: $_dob',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  'Gender: $_gender',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    _showUpdateDialog(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF001489),
+                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: Text(
+                    'Update Profile',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class FlightDetail {
   final String origin;
@@ -16,6 +18,164 @@ class FlightDetail {
     required this.hasLayover,
     this.layoverDuration = '',
   });
+
+  factory FlightDetail.fromJson(Map<String, dynamic> json) {
+    return FlightDetail(
+      origin: json['originLocationCode'] ?? '',
+      destination: json['destinationLocationCode'] ?? '',
+      departureTime: json['departureDate'] ?? '',
+      arrivalTime: json['arrivalDate'] ?? '',
+      hasLayover: json['nonStop'] ?? false,
+      layoverDuration: json['flightStops'] ?? '',
+    );
+  }
+}
+
+class FlightResultsPage extends StatelessWidget {
+  final List<FlightDetail> flights;
+
+  FlightResultsPage({required this.flights});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Flight Search Results'),
+        backgroundColor: Colors.deepOrangeAccent,
+      ),
+      body: ListView.builder(
+        itemCount: flights.length,
+        itemBuilder: (context, index) {
+          final flight = flights[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FlightDetailsPage(flight: flight),
+                ),
+              );
+            },
+            child: Container(
+              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Icon(
+                    Icons.flight,
+                    size: 40,
+                    color: Colors.blue,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Origin: ${flight.origin}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Destination: ${flight.destination}',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Departure Time: ${flight.departureTime}',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Arrival Time: ${flight.arrivalTime}',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          flight.hasLayover
+                              ? 'Layover Duration: ${flight.layoverDuration}'
+                              : 'Direct Flight',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward_ios),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class FlightDetailsPage extends StatelessWidget {
+  final FlightDetail flight;
+
+  FlightDetailsPage({required this.flight});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Flight Details'),
+        backgroundColor: Colors.deepOrangeAccent,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Origin: ${flight.origin}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Destination: ${flight.destination}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Departure Time: ${flight.departureTime}',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Arrival Time: ${flight.arrivalTime}',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            SizedBox(height: 8),
+            Text(
+              flight.hasLayover
+                  ? 'Layover Duration: ${flight.layoverDuration}'
+                  : 'Direct Flight',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: FlightResultsPage(
+      flights: [
+        // Add your FlightDetail objects here
+      ],
+    ),
+  ));
 }
 
 class FlightBookingsPage extends StatefulWidget {
@@ -24,14 +184,69 @@ class FlightBookingsPage extends StatefulWidget {
 }
 
 class _FlightBookingsPageState extends State<FlightBookingsPage> {
-  String selectedDestination = 'Destination 1';
-  String selectedArrival = 'Arrival 1';
+  String selectedDestination = 'BOM';
+  String selectedArrival = 'DXB';
   bool isOneWay = true;
   bool isRoundTrip = false;
   int adultsCount = 1;
   int childsCount = 0;
+
   DateTime? departureDate;
   DateTime? returnDate;
+  List<FlightDetail> flightResults = [];
+
+  Future<void> searchFlights() async {
+    final String apiKey = '';
+    final String apiUrl =
+        'https://test.api.amadeus.com/v2/shopping/flight-offers';
+
+    final headers = {
+      'Authorization': 'Bearer $apiKey',
+    };
+
+    final queryParams = {
+      'originLocationCode': 'JFK',
+      'destinationLocationCode': selectedDestination,
+      'departureDate': departureDate != null
+          ? departureDate!.toIso8601String().split('T')[0]
+          : '',
+      'returnDate':
+          returnDate != null ? returnDate!.toIso8601String().split('T')[0] : '',
+      'adults': adultsCount.toString(),
+      // ... other parameters ...
+    };
+
+    final uri = Uri.parse(apiUrl).replace(queryParameters: queryParams);
+
+    final response = await http.get(
+      uri,
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      final flightsData = jsonResponse['data'] as List<dynamic>;
+
+      final flights = flightsData
+          .map((flightData) => FlightDetail.fromJson(flightData))
+          .toList();
+      print('Parsed Flights: $flights');
+
+      setState(() {
+        flightResults = flights;
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FlightResultsPage(flights: flightResults),
+        ),
+      );
+    } else {
+      print('API request failed with status code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +281,7 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
                         selectedDestination = value!;
                       });
                     },
-                    items: ['Destination 1', 'Destination 2', 'Destination 3']
+                    items: ['JFK', 'BOM', 'DXB']
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -84,7 +299,7 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
                         selectedArrival = value!;
                       });
                     },
-                    items: ['Arrival 1', 'Arrival 2', 'Arrival 3']
+                    items: ['JFK', 'BOM', 'DXB']
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -261,20 +476,7 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FlightResultsPage(
-                            destination: selectedDestination,
-                            arrival: selectedArrival,
-                            isOneWay: isOneWay,
-                            adultsCount: adultsCount,
-                            childsCount: childsCount,
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: searchFlights,
                     style: ElevatedButton.styleFrom(
                       primary: Colors.deepOrangeAccent,
                       shape: RoundedRectangleBorder(
@@ -304,160 +506,3 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
     );
   }
 }
-
-class FlightResultsPage extends StatelessWidget {
-  final String destination;
-  final String arrival;
-  final bool isOneWay;
-  final int adultsCount;
-  final int childsCount;
-
-  FlightResultsPage({
-    required this.destination,
-    required this.arrival,
-    required this.isOneWay,
-    required this.adultsCount,
-    required this.childsCount,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Flight Search Results'),
-        backgroundColor: Colors.deepOrangeAccent,
-      ),
-      body: ListView.builder(
-        itemCount: dummyFlights.length,
-        itemBuilder: (context, index) {
-          final flight = dummyFlights[index];
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => FlightDetailsPage(flight: flight),
-                ),
-              );
-            },
-            child: Container(
-              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Icon(
-                    Icons.flight,
-                    size: 40,
-                    color: Colors.blue,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${flight.origin} - ${flight.destination}',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '${flight.departureTime} - ${flight.arrivalTime}',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          flight.hasLayover
-                              ? 'Layover: ${flight.layoverDuration}'
-                              : 'Direct',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class FlightDetailsPage extends StatelessWidget {
-  final FlightDetail flight;
-
-  FlightDetailsPage({required this.flight});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Flight Details'),
-        backgroundColor: Colors.deepOrangeAccent,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Flight Details',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Origin: ${flight.origin}',
-              style: TextStyle(fontSize: 18),
-            ),
-            Text(
-              'Destination: ${flight.destination}',
-              style: TextStyle(fontSize: 18),
-            ),
-            Text(
-              'Departure Time: ${flight.departureTime}',
-              style: TextStyle(fontSize: 18),
-            ),
-            Text(
-              'Arrival Time: ${flight.arrivalTime}',
-              style: TextStyle(fontSize: 18),
-            ),
-            Text(
-              flight.hasLayover
-                  ? 'Layover: ${flight.layoverDuration}'
-                  : 'Direct',
-              style: TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-List<FlightDetail> dummyFlights = [
-  FlightDetail(
-    origin: 'JFK',
-    destination: 'LAX',
-    departureTime: '08:00 AM',
-    arrivalTime: '11:00 AM',
-    hasLayover: true,
-    layoverDuration: '2h 30m',
-  ),
-  FlightDetail(
-    origin: 'LAX',
-    destination: 'SFO',
-    departureTime: '12:00 PM',
-    arrivalTime: '02:00 PM',
-    hasLayover: false,
-  ),
-  // Add more dummy flights as needed
-];
