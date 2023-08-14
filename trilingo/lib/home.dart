@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:trilingo/home_widgets/chatgpt_chatbot.dart';
 import 'package:trilingo/home_widgets/food_beverages_page.dart';
 import 'profile_page.dart';
 import 'package:trilingo/home_widgets/flight_bookings_page.dart';
@@ -153,7 +154,12 @@ class HomePage extends StatelessWidget {
                 ''',
                 backgroundColors: [Color(0xFFFFE89F), Color(0xFFFFD699)],
                 onPressed: () {
-                  // Handle button press for AI Chatbot
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatPage(),
+                    ),
+                  );
                 },
                 showExploreButton: true,
               ),
@@ -185,7 +191,7 @@ class AnimatedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 520,
+      height: 560,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -208,7 +214,7 @@ class AnimatedCard extends StatelessWidget {
         children: [
           Image.asset(
             imagePath,
-            height: 260,
+            height: 300,
             width: 180,
             fit: BoxFit.cover,
           ),
