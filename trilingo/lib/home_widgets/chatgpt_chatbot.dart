@@ -60,109 +60,130 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 168, 208, 235),
-        elevation: 0,
-        title: Text(
-          "Lingo : Trilingo's AI",
-          style: TextStyle(
-            fontSize: 24,
-            color: Colors.black,
-          ),
-        ),
-      ),
-      body: Container(
-        color: Color.fromARGB(255, 168, 208, 235),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _buildList(),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: _buildInput(),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildSubmit(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubmit() {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 10,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: () async {
-          setState(() {
-            _messages.add(
-              ChatMessage(
-                text: _textController.text,
-                chatMessageType: ChatMessageType.user,
-              ),
-            );
-            isLoading = true;
-          });
-
-          var input = _textController.text;
-          _textController.clear();
-          Future.delayed(const Duration(milliseconds: 50))
-              .then((_) => _scrollDown());
-
-          generateResponse(input).then((value) {
-            setState(() {
-              isLoading = false;
-              _messages.add(
-                ChatMessage(
-                  text: value,
-                  chatMessageType: ChatMessageType.bot,
-                ),
-              );
-            });
-          });
-
-          _textController.clear();
-          Future.delayed(const Duration(milliseconds: 50))
-              .then((_) => _scrollDown());
-        },
-        style: ElevatedButton.styleFrom(
-          primary: Color.fromARGB(255, 13, 255, 0),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: Color.fromARGB(255, 168, 208, 235),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(
-              Icons.send,
-              color: Colors.black,
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 40, horizontal: 10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF1976D2), Color(0x901976D2)],
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        alignment: Alignment.topLeft,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.android,
+                          color: Color(0xFF1976D2),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Text(
+                        "Lingo: Trilingo's AI",
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 22),
+                  Text(
+                    "Hi there! How can I assist you today?",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                ],
+              ),
             ),
-            SizedBox(width: 8),
-            Text(
-              "Send",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
+            SizedBox(height: 16),
+            Container(
+              height: 630,
+              width: 300,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1976D2), Color(0x301976D2)],
+                ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.6),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _buildList(),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          textCapitalization: TextCapitalization.sentences,
+                          style: TextStyle(color: Colors.white),
+                          controller: _textController,
+                          cursorRadius: Radius.circular(2),
+                          onSubmitted: (_) => _sendMessage(),
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(16),
+                            fillColor: Colors.black.withOpacity(0.2),
+                            filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            hintText: "Type a message...",
+                            hintStyle: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      IconButton(
+                        onPressed: _sendMessage,
+                        icon: Icon(
+                          Icons.send,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -171,47 +192,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Widget _buildInput() {
-    return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 10,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: TextField(
-          textCapitalization: TextCapitalization.sentences,
-          style: TextStyle(color: Colors.white),
-          controller: _textController,
-          cursorRadius: Radius.circular(2),
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.all(16), // Adjust padding as needed
-            fillColor: Colors.black,
-            filled: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide.none,
-            ),
-            hintText: "Type a message...",
-            hintStyle: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-    );
-  }
-
-  ListView _buildList() {
+  Widget _buildList() {
     return ListView.builder(
       controller: _scrollController,
       itemCount: _messages.length,
@@ -232,10 +213,42 @@ class _ChatPageState extends State<ChatPage> {
       curve: Curves.easeOut,
     );
   }
+
+  void _sendMessage() {
+    String messageText = _textController.text.trim();
+    if (messageText.isNotEmpty) {
+      setState(() {
+        _messages.add(
+          ChatMessage(
+            text: messageText,
+            chatMessageType: ChatMessageType.user,
+          ),
+        );
+      });
+
+      generateResponse(messageText).then((value) {
+        setState(() {
+          _messages.add(
+            ChatMessage(
+              text: value,
+              chatMessageType: ChatMessageType.bot,
+            ),
+          );
+        });
+      });
+
+      _textController.clear();
+      Future.delayed(const Duration(milliseconds: 50))
+          .then((_) => _scrollDown());
+    }
+  }
 }
 
 class ChatMessageWidget extends StatelessWidget {
-  const ChatMessageWidget({required this.text, required this.chatMessageType});
+  const ChatMessageWidget({
+    required this.text,
+    required this.chatMessageType,
+  });
 
   final String text;
   final ChatMessageType chatMessageType;
@@ -246,11 +259,18 @@ class ChatMessageWidget extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 9.0, horizontal: 8.0),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius:
-            BorderRadius.circular(25), // Rounded corners with radius 10
-        color: chatMessageType == ChatMessageType.bot
-            ? Colors.amberAccent
-            : Color.fromARGB(255, 121, 189, 235), // Adjust color here
+        borderRadius: BorderRadius.circular(25),
+        gradient: LinearGradient(
+          begin: chatMessageType == ChatMessageType.bot
+              ? Alignment.centerLeft
+              : Alignment.centerRight,
+          end: chatMessageType == ChatMessageType.bot
+              ? Alignment.centerRight
+              : Alignment.centerLeft,
+          colors: chatMessageType == ChatMessageType.bot
+              ? [Color(0xFF0C0C0C), Color(0xFF0C0C0C).withOpacity(0.8)]
+              : [Color(0xFF1976D2), Color(0xFF1976D2).withOpacity(0.8)],
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +279,7 @@ class ChatMessageWidget extends StatelessWidget {
               ? Container(
                   margin: EdgeInsets.only(right: 16.0),
                   child: CircleAvatar(
-                    backgroundColor: Colors.grey,
+                    backgroundColor: Color(0xFF0C0C0C),
                     child: Text(
                       "L",
                       style: TextStyle(
@@ -295,4 +315,11 @@ class ChatMessageWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: ChatPage(),
+    debugShowCheckedModeBanner: false,
+  ));
 }

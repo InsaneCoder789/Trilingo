@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
   final User? user;
@@ -11,18 +13,44 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String _displayName = '';
-  String _email = '';
-  String _dob = '';
-  String _gender = '';
+  late String _displayName;
+  late String _email;
+  late DateTime _dob;
+  late String _gender;
 
   @override
   void initState() {
     _displayName = widget.user?.displayName ?? 'Guest';
     _email = widget.user?.email ?? 'guest@example.com';
-    _dob = 'July 1, 1990';
+    _dob = DateTime(1990, 7, 1);
     _gender = 'Male';
     super.initState();
+  }
+
+  Future<void> _selectImage() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedImage != null) {
+      setState(() {
+        widget.user?.updatePhotoURL(pickedImage.path);
+      });
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(1990, 7, 1), // Initial date for the picker
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null && picked != _dob) {
+      setState(() {
+        _dob = picked;
+      });
+    }
   }
 
   void _showUpdateDialog(BuildContext context) {
@@ -80,8 +108,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   SizedBox(height: 8),
                   InkWell(
-                    onTap: () async {
-                      // Show date picker and update date of birth
+                    onTap: () {
+                      _selectDate(context);
                     },
                     child: InputDecorator(
                       decoration: InputDecoration(
@@ -92,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Icon(Icons.calendar_today),
                           SizedBox(width: 8),
                           Text(
-                            "July 1, 1990",
+                            DateFormat('MMM dd, yyyy').format(_dob),
                             style: TextStyle(fontSize: 16),
                           ),
                         ],
@@ -109,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   SizedBox(height: 8),
                   DropdownButton<String>(
-                    value: 'Male',
+                    value: _gender,
                     onChanged: (value) {
                       setState(() {
                         _gender = value!;
@@ -222,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       right: 0,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Handle updating profile image
+                          _selectImage();
                         },
                         style: ElevatedButton.styleFrom(
                           shape: CircleBorder(),
@@ -254,7 +282,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  'Date of Birth: $_dob',
+                  'Date of Birth: ${DateFormat('MMM dd, yyyy').format(_dob)}',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],

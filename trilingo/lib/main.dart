@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       title: 'Trilingo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.blueAccent,
+        scaffoldBackgroundColor: Color.fromARGB(255, 168, 208, 235),
       ),
       initialRoute: '/', // Set the initial route
       routes: {
