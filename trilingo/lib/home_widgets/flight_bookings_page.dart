@@ -224,6 +224,8 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
   DateTime? returnDate;
   List<FlightDetail> flightResults = [];
 
+  double widgetHeight = 620; // Default height for Round trip
+
   Future<void> searchFlights() async {
     final String apiKey = '';
     final String apiUrl =
@@ -259,7 +261,6 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
       final flights = flightsData
           .map((flightData) => FlightDetail.fromJson(flightData))
           .toList();
-      print('Parsed Flights: $flights');
 
       setState(() {
         flightResults = flights;
@@ -283,7 +284,7 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
       appBar: AppBar(
         title: Text('Flight Bookings'),
         backgroundColor: Color(0xFFC2E2FF),
-        elevation: 0, // Match the app bar color from the homepage
+        elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -301,7 +302,7 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
         ),
         child: Center(
           child: Container(
-            height: 620,
+            height: widgetHeight,
             width: 350,
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -377,6 +378,8 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
                           isOneWay = value!;
                           if (isOneWay) {
                             isRoundTrip = false;
+                            widgetHeight =
+                                640; // Adjust height for One-way trip
                           }
                         });
                       },
@@ -396,6 +399,7 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
                           isRoundTrip = value!;
                           if (isRoundTrip) {
                             isOneWay = false;
+                            widgetHeight = 720; // Default height for Round trip
                           }
                         });
                       },

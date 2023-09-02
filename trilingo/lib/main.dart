@@ -4,7 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'signup_page.dart';
 import 'home.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:trilingo/welcome_page.dart';
+import 'welcome_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +19,6 @@ class MyApp extends StatelessWidget {
   MyApp({required this.googleSignIn});
 
   @override
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Trilingo',
@@ -27,10 +26,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Color.fromARGB(255, 168, 208, 235),
       ),
-      initialRoute: '/', // Set the initial route
+      initialRoute: '/',
       routes: {
         '/': (context) => ImageSplashScreen(googleSignIn: googleSignIn),
-        '/welcome': (context) => WelcomePage(googleSignIn: googleSignIn),
+        '/welcome': (context) => Onboarding1Widget(),
         '/signup': (context) => SignupPage(),
         '/home': (context) =>
             HomePage(user: ModalRoute.of(context)?.settings.arguments as User?),
@@ -49,28 +48,48 @@ class ImageSplashScreen extends StatefulWidget {
 }
 
 class _ImageSplashScreenState extends State<ImageSplashScreen> {
+  double opacity = 1.0;
+
   @override
   void initState() {
     super.initState();
-    // Delay the splash screen for 2 seconds
     Future.delayed(Duration(seconds: 2), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => WelcomePage(googleSignIn: widget.googleSignIn),
-        ),
-      );
+      setState(() {
+        opacity = 0.0;
+      });
+      Future.delayed(Duration(milliseconds: 100), () {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return Onboarding1Widget();
+            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return Opacity(
+                opacity: animation.value,
+                child: child,
+              );
+            },
+          ),
+        );
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.deepPurpleAccent, // Updated background color
+      color: Color.fromARGB(255, 168, 208, 235),
       child: Center(
-        child: Image.asset(
-          'assets/images/Trilingo-image.png',
-          fit: BoxFit.cover,
+        child: Opacity(
+          opacity: opacity,
+          child: Image.asset(
+            'assets/images/welcome_image.png',
+            fit: BoxFit.cover,
+            height: 200,
+            width: 200,
+          ),
         ),
       ),
     );

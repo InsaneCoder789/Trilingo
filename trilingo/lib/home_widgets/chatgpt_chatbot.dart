@@ -121,7 +121,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
             SizedBox(height: 16),
             Container(
-              height: 630,
+              height: 600,
               width: 300,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
