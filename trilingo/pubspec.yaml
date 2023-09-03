@@ -52,7 +52,11 @@ flutter:
     - assets/images/Homescreenimage.png
     - assets/images/loginpage.png
     - assets/images/signuppage.png
-    - assets/animations/main_animation.mp4
+    - assets/animations/main1.mp4
+    - assets/animations/main2.mp4
+    - assets/animations/main3.mp4
+    - assets/animations/main4.mp4
+    - assets/animations/main5.mp4
 
 
     # Add other asset paths here
