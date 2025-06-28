@@ -75,7 +75,7 @@ class _HotelBookingsPageState extends State<HotelBookingsPage> {
                       // Perform search action
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF1976D2),
+                      backgroundColor: Color(0xFF1976D2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -199,7 +199,7 @@ class _HotelBookingsPageState extends State<HotelBookingsPage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Color(0xFF1976D2),
+                        backgroundColor: Color(0xFF1976D2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -233,7 +233,7 @@ class _HotelBookingsPageState extends State<HotelBookingsPage> {
                         // Implement hotel booking logic here
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Color(0xFF1976D2),
+                        backgroundColor: Color(0xFF1976D2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

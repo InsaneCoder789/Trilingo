@@ -551,7 +551,7 @@ class _FlightBookingsPageState extends State<FlightBookingsPage> {
                 ElevatedButton(
                   onPressed: searchFlights,
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.deepOrangeAccent,
+                    backgroundColor: Colors.deepOrangeAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

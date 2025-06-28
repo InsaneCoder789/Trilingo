@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "368534196770",
     "project_id": "trilingo-2402",
-    "storage_bucket": "trilingo-2402.appspot.com"
+    "storage_bucket": "trilingo-2402.firebasestorage.app"
   },
   "client": [
     {
@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "368534196770-k2jik4t51vbfn6k0f1cg89r9faivdvtr.apps.googleusercontent.com",
+          "client_id": "368534196770-mj8aph85mm8vucu21pept3cesadql9bd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.trilingo",
+            "certificate_hash": "f5787f3ad8abc91d0e56ef07aae8f2fd91ff6967"
+          }
+        },
+        {
+          "client_id": "368534196770-mq55ebpa9c4f62b6d33h52mlfo6bij59.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -29,6 +37,13 @@
             {
               "client_id": "368534196770-k2jik4t51vbfn6k0f1cg89r9faivdvtr.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "368534196770-cf6hctf6fgn5gisoa2b98ajloucn7g6b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.trilingo"
+              }
             }
           ]
         }

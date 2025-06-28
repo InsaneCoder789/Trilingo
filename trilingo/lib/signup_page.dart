@@ -16,21 +16,48 @@ class SignupPage extends StatelessWidget {
         email: emailController.text,
         password: passwordController.text,
       );
-      // Handle successful signup, e.g., navigate to a new page.
       print('Sign-Up Successful! User ID: ${userCredential.user!.uid}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Sign-Up Successful!'),
-        ),
+        SnackBar(content: Text('Sign-Up Successful!')),
       );
       Navigator.pushNamed(context, '/');
     } catch (e) {
-      // Handle signup errors, e.g., show an error message.
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Sign-Up Failed. Please try again.'),
-        ),
+        SnackBar(content: Text('Sign-Up Failed. Please try again.')),
+      );
+    }
+  }
+
+  void handleGoogleSignIn(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Google sign-in canceled')),
+        );
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In Successful')),
+      );
+
+      Navigator.pushNamed(context, '/');
+    } catch (e) {
+      print('Google Sign-In Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In Failed')),
       );
     }
   }
@@ -38,13 +65,11 @@ class SignupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Use a Stack to place the background image.
       body: Stack(
         children: [
-          // Background image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/signuppage.png', // Replace with your background image path
+              'assets/images/signuppage.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -52,11 +77,10 @@ class SignupPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
-                padding: EdgeInsets.only(top: 5), // Adjust the top padding
+                padding: EdgeInsets.only(top: 5),
                 width: 400,
                 height: 580,
                 child: Card(
-                  // Make the card background transparent
                   color: Colors.transparent,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -65,8 +89,7 @@ class SignupPage extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                          height: 20), // Adjust the space above the content
+                      SizedBox(height: 20),
                       CircleAvatar(
                         backgroundColor: Colors.transparent,
                         radius: 60,
@@ -157,14 +180,15 @@ class SignupPage extends StatelessWidget {
                                 handleSignup(context);
                               },
                               style: ElevatedButton.styleFrom(
-                                primary: Color.fromARGB(255, 0, 136, 255),
+                                backgroundColor:
+                                    Color.fromARGB(255, 0, 136, 255),
                                 elevation: 45,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(25.0),
                                 ),
                                 padding: EdgeInsets.symmetric(
                                     vertical: 20, horizontal: 40),
-                                minimumSize: Size(350, 0), // Stretch the button
+                                minimumSize: Size(350, 0),
                               ),
                               child: Text(
                                 'Signup',
@@ -172,6 +196,26 @@ class SignupPage extends StatelessWidget {
                                   color: Colors.white,
                                   fontSize: 18,
                                 ),
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () => handleGoogleSignIn(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.black,
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25.0),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 24),
+                                minimumSize: Size(350, 0),
+                              ),
+                              icon: Icon(LineIcons.googleLogo, size: 20),
+                              label: Text(
+                                'Sign up with Google',
+                                style: TextStyle(fontSize: 16),
                               ),
                             ),
                           ],

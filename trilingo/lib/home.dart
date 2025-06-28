@@ -62,7 +62,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 28),
               AnimatedCard(
                 imagePath: 'assets/images/welcome_image.png',
                 title: 'Welcome to Trilingo',
@@ -73,7 +73,7 @@ class HomePage extends StatelessWidget {
                 onPressed: () {},
                 showExploreButton: false,
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 28),
               AnimatedCard(
                 imagePath: 'assets/images/flight_booking.png',
                 title: 'Flight Bookings',
@@ -91,7 +91,7 @@ class HomePage extends StatelessWidget {
                 },
                 showExploreButton: true,
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 28),
               AnimatedCard(
                 imagePath: 'assets/images/hotel_booking.png',
                 title: 'Hotel Bookings',
@@ -109,7 +109,7 @@ class HomePage extends StatelessWidget {
                 },
                 showExploreButton: true,
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 28),
               AnimatedCard(
                 imagePath: 'assets/images/language_translator.png',
                 title: 'Language Translator',
@@ -127,7 +127,7 @@ class HomePage extends StatelessWidget {
                 },
                 showExploreButton: true,
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 28),
               AnimatedCard(
                 imagePath: 'assets/images/food_beverages.png',
                 title: 'Food and Beverages',
@@ -145,7 +145,7 @@ class HomePage extends StatelessWidget {
                 },
                 showExploreButton: true,
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 28),
               AnimatedCard(
                 imagePath: 'assets/images/ai_chatbot.png',
                 title: 'AI Chatbot',
@@ -242,15 +242,14 @@ class AnimatedCard extends StatelessWidget {
           ),
           SizedBox(
               height: showExploreButton
-                  ? 16
+                  ? 12
                   : 0), // Add space for Explore button if needed
           if (showExploreButton)
             TextButton(
               onPressed: onPressed,
               style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                foregroundColor: Colors.white, padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 backgroundColor: Colors.black,
-                primary: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),

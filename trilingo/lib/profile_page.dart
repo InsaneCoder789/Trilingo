@@ -253,9 +253,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           _selectImage();
                         },
                         style: ElevatedButton.styleFrom(
-                          shape: CircleBorder(),
+                          shape: CircleBorder(), backgroundColor: Color(0xFF001489),
                           padding: EdgeInsets.all(16),
-                          primary: Color(0xFF001489),
                           elevation: 8,
                         ),
                         child: Icon(Icons.camera_alt, color: Colors.white),
@@ -301,7 +300,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     _showUpdateDialog(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF001489),
+                    backgroundColor: Color(0xFF001489),
                     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

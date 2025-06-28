@@ -85,7 +85,7 @@ class _LanguageTranslatorPageState extends State<LanguageTranslatorPage> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF1976D2),
+                      backgroundColor: Color(0xFF1976D2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -117,7 +117,7 @@ class _LanguageTranslatorPageState extends State<LanguageTranslatorPage> {
                       // Implement play logic here
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF1976D2),
+                      backgroundColor: Color(0xFF1976D2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

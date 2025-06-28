@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -8,7 +9,23 @@ import 'welcome_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+
+  print("⏳ Initializing Firebase...");
+
+  try {
+    await Firebase.initializeApp().timeout(
+      Duration(seconds: 10),
+      onTimeout: () {
+        print("⛔ Firebase.init timed out after 10 seconds");
+        throw TimeoutException("Firebase initialization timed out");
+      },
+    );
+    print("✅ Firebase initialized successfully");
+  } catch (e, stackTrace) {
+    print("❌ Firebase initialization failed: $e");
+    print(stackTrace);
+  }
+
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   runApp(MyApp(googleSignIn: _googleSignIn));
 }

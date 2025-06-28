@@ -111,7 +111,7 @@ class _Onboarding1WidgetState extends State<Onboarding1Widget> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF6A57FF), // Purple
+                    backgroundColor: Color(0xFF6A57FF), // Purple
                     minimumSize: Size(300, 62),
                     textStyle: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
@@ -139,8 +139,7 @@ class _Onboarding1WidgetState extends State<Onboarding1Widget> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.white,
-                    onPrimary: Color(0xFF6A57FF), // Purple
+                    foregroundColor: Color(0xFF6A57FF), backgroundColor: Colors.white, // Purple
                     minimumSize: Size(300, 62),
                     textStyle: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',

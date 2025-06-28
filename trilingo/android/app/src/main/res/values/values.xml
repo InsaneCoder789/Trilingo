@@ -1,0 +1,20 @@
+<resources>
+    <string name="default_web_client_id" translatable="false">
+        368534196770-mj8aph85mm8vucu21pept3cesadql9bd.apps.googleusercontent.com
+    </string>
+    <string name="firebase_database_url" translatable="false">
+        https://trilingo-2402.firebaseio.com
+    </string>
+    <string name="gcm_defaultSenderId" translatable="false">
+        368534196770
+    </string>
+    <string name="google_app_id" translatable="false">
+        1:368534196770:android:ac37eca75647952ba1f07b
+    </string>
+    <string name="google_api_key" translatable="false">
+        AIzaSyAwqJ7qqXH5HWbuukCdvekTm2bz1uvt4lU
+    </string>
+    <string name="project_id" translatable="false">
+        trilingo-2402
+    </string>
+</resources>

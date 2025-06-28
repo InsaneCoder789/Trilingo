@@ -150,7 +150,7 @@ class LoginPage extends StatelessWidget {
                         context, emailController.text, passwordController.text);
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF00B4DB),
+                    backgroundColor: Color(0xFF00B4DB),
                     elevation: 45,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -181,7 +181,7 @@ class LoginPage extends StatelessWidget {
                     _handleGoogleSignIn(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.white,
+                    backgroundColor: Colors.white,
                     elevation: 40,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
