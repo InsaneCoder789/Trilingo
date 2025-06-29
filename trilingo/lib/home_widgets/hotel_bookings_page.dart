@@ -309,8 +309,8 @@ class _HotelBookingsPageState extends State<HotelBookingsPage> {
 }
 
 class HotelApiService {
-  static const apiKey = '';
-  static const secret = '';
+  static const apiKey = 'ccd37e61d6b6b205c736e05cc670b7e9';
+  static const secret = '269fadc249';
 
   static const Map<String, String> destinationCodes = {
     'london': 'LON', 'paris': 'PAR', 'new york': 'NYC', 'dubai': 'DXB', 'tokyo': 'TYO',

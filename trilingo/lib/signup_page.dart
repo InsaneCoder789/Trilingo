@@ -77,9 +77,9 @@ class SignupPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
-                padding: EdgeInsets.only(top: 5),
+                padding: EdgeInsets.only(top: 1),
                 width: 400,
-                height: 580,
+                height: 650,
                 child: Card(
                   color: Colors.transparent,
                   elevation: 0,
@@ -96,17 +96,17 @@ class SignupPage extends StatelessWidget {
                         backgroundImage:
                             AssetImage('assets/images/welcome_image.png'),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 10),
                       Text(
                         'Welcome!',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Color.fromARGB(255, 238, 240, 243),
-                          fontSize: 30,
+                          fontSize: 40,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 40),
+                      SizedBox(height: 20),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30),
                         child: Column(
@@ -174,7 +174,7 @@ class SignupPage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            SizedBox(height: 30),
+                            SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: () {
                                 handleSignup(context);
@@ -198,7 +198,7 @@ class SignupPage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            SizedBox(height: 16),
+                            SizedBox(height: 20),
                             ElevatedButton.icon(
                               onPressed: () => handleGoogleSignIn(context),
                               style: ElevatedButton.styleFrom(
