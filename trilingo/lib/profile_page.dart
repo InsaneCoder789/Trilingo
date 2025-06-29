@@ -1,321 +1,313 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
   final User? user;
-
-  ProfilePage({this.user});
+  const ProfilePage({super.key, required this.user});
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late String _displayName;
-  late String _email;
+  late TextEditingController _nameController;
   late DateTime _dob;
-  late String _gender;
+  String _gender = 'Male';
+  IconData? _selectedAvatar;
+
+  final List<IconData> _avatarIcons = [
+    Icons.pets,
+    Icons.android,
+    Icons.face,
+    Icons.rocket_launch,
+    Icons.auto_awesome,
+    Icons.catching_pokemon,
+    Icons.emoji_nature,
+    Icons.bug_report,
+    Icons.star,
+    Icons.waves,
+  ];
 
   @override
   void initState() {
-    _displayName = widget.user?.displayName ?? 'Guest';
-    _email = widget.user?.email ?? 'guest@example.com';
-    _dob = DateTime(1990, 7, 1);
-    _gender = 'Male';
     super.initState();
+    _nameController = TextEditingController(text: widget.user?.displayName ?? '');
+    _dob = DateTime(1990, 1, 1);
+    _loadUserData();
   }
 
-  Future<void> _selectImage() async {
-    final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedImage != null) {
+  Future<void> _loadUserData() async {
+    if (widget.user == null) return;
+    final doc = await FirebaseFirestore.instance.collection('users').doc(widget.user!.uid).get();
+    if (doc.exists) {
+      final data = doc.data()!;
       setState(() {
-        widget.user?.updatePhotoURL(pickedImage.path);
+        _nameController.text = data['name'] ?? _nameController.text;
+        _dob = (data['dob'] as Timestamp?)?.toDate() ?? _dob;
+        _gender = data['gender'] ?? _gender;
+        if (data['avatarIndex'] != null) {
+          _selectedAvatar = _avatarIcons[data['avatarIndex']];
+        }
       });
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _saveUserData() async {
+    if (widget.user == null) return;
+    await FirebaseFirestore.instance.collection('users').doc(widget.user!.uid).set({
+      'name': _nameController.text,
+      'dob': _dob,
+      'gender': _gender,
+      'avatarIndex': _selectedAvatar != null ? _avatarIcons.indexOf(_selectedAvatar!) : null,
+    }, SetOptions(merge: true));
+    await widget.user?.updateDisplayName(_nameController.text);
+  }
+
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(1990, 7, 1), // Initial date for the picker
+      initialDate: _dob,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
-
     if (picked != null && picked != _dob) {
-      setState(() {
-        _dob = picked;
-      });
+      setState(() => _dob = picked);
     }
   }
 
-  void _showUpdateDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+  Widget _buildAvatarSelector() {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: _avatarIcons.map((icon) {
+        return GestureDetector(
+          onTap: () => setState(() => _selectedAvatar = icon),
+          child: CircleAvatar(
+            radius: 30,
+            backgroundColor: _selectedAvatar == icon ? Colors.cyanAccent : Colors.white24,
+            child: Icon(icon, size: 30, color: Colors.white),
           ),
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          child: SingleChildScrollView(
-            child: Container(
-              padding: EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    initialValue: _displayName,
-                    onChanged: (value) {
-                      setState(() {
-                        _displayName = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Display Name',
-                      border: OutlineInputBorder(),
+        );
+      }).toList(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isGoogleUser = widget.user?.providerData.any((p) => p.providerId == 'google.com') ?? false;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AnimatedSpaceBackground()),
+          Positioned(
+            top: 40,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.cyanAccent, size: 30),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                width: 350,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.cyanAccent, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.cyanAccent.withOpacity(0.3),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                    )
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.black,
+                      backgroundImage: isGoogleUser && widget.user?.photoURL != null
+                          ? NetworkImage(widget.user!.photoURL!)
+                          : null,
+                      child: !isGoogleUser && _selectedAvatar != null
+                          ? Icon(_selectedAvatar, color: Colors.white, size: 40)
+                          : null,
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    initialValue: _email,
-                    onChanged: (value) {
-                      setState(() {
-                        _email = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Date of Birth',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  InkWell(
-                    onTap: () {
-                      _selectDate(context);
-                    },
-                    child: InputDecorator(
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _nameController,
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.calendar_today),
-                          SizedBox(width: 8),
-                          Text(
-                            DateFormat('MMM dd, yyyy').format(_dob),
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
+                        labelText: 'Display Name',
+                        labelStyle: const TextStyle(color: Colors.cyanAccent),
+                        filled: true,
+                        fillColor: Colors.white10,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Gender',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    const SizedBox(height: 16),
+                    InkWell(
+                      onTap: _selectDate,
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Date of Birth',
+                          labelStyle: const TextStyle(color: Colors.cyanAccent),
+                          filled: true,
+                          fillColor: Colors.white10,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              DateFormat('MMM dd, yyyy').format(_dob),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            const Icon(Icons.calendar_today, color: Colors.white70),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  DropdownButton<String>(
-                    value: _gender,
-                    onChanged: (value) {
-                      setState(() {
-                        _gender = value!;
-                      });
-                    },
-                    items: <String>['Male', 'Female', 'Other']
-                        .map<DropdownMenuItem<String>>(
-                      (String value) {
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _gender,
+                      dropdownColor: Colors.black,
+                      iconEnabledColor: Colors.cyanAccent,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Gender',
+                        labelStyle: const TextStyle(color: Colors.cyanAccent),
+                        filled: true,
+                        fillColor: Colors.white10,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      items: ['Male', 'Female', 'Other'].map((gender) {
                         return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
+                          value: gender,
+                          child: Text(gender),
                         );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) setState(() => _gender = value);
                       },
-                    ).toList(),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Choose Avatar (For non-Google users)',
+                      style: TextStyle(color: Colors.cyanAccent, fontSize: 14),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildAvatarSelector(),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _saveUserData();
+                        if (!isGoogleUser && _selectedAvatar != null) {
+                          await widget.user?.updatePhotoURL(_selectedAvatar.toString());
+                        }
+                        if (context.mounted) Navigator.of(context).pop(true);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.cyanAccent,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          // Update user profile with the new information
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Save',
-                          style: TextStyle(
-                            color: Color(0xFF001489),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      child: const Text(
+                        'Save Profile',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ],
-                  ),
-                ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class AnimatedSpaceBackground extends StatefulWidget {
+  const AnimatedSpaceBackground({super.key});
+  @override
+  State<AnimatedSpaceBackground> createState() => _AnimatedSpaceBackgroundState();
+}
+
+class _AnimatedSpaceBackgroundState extends State<AnimatedSpaceBackground> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late List<Offset> starPositions;
+  late List<double> starOpacities;
+  final int numStars = 150;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+    final random = Random();
+    starPositions = List.generate(numStars, (_) => Offset(random.nextDouble(), random.nextDouble()));
+    starOpacities = List.generate(numStars, (_) => random.nextDouble() * 0.6 + 0.4);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        return CustomPaint(
+          painter: StarfieldPainter(
+            animationValue: _controller.value,
+            starPositions: starPositions,
+            starOpacities: starOpacities,
+          ),
+          size: Size.infinite,
         );
       },
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFC2E2FF), Color(0xFFC2E2FF)],
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text('User Profile'),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-        body: Center(
-          child: Container(
-            height: 440,
-            width: 320,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(widget.user?.photoURL ?? ''),
-                        radius: 80,
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _selectImage();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          shape: CircleBorder(), backgroundColor: Color(0xFF001489),
-                          padding: EdgeInsets.all(16),
-                          elevation: 8,
-                        ),
-                        child: Icon(Icons.camera_alt, color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Text(
-                  _displayName,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  _email,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Date of Birth: ${DateFormat('MMM dd, yyyy').format(_dob)}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                Text(
-                  'Gender: $_gender',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    _showUpdateDialog(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF001489),
-                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: Text(
-                    'Update Profile',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
+}
+
+class StarfieldPainter extends CustomPainter {
+  final double animationValue;
+  final List<Offset> starPositions;
+  final List<double> starOpacities;
+
+  StarfieldPainter({
+    required this.animationValue,
+    required this.starPositions,
+    required this.starOpacities,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    for (int i = 0; i < starPositions.length; i++) {
+      final dx = starPositions[i].dx * size.width;
+      final dy = starPositions[i].dy * size.height;
+      final radius = 0.8 + (animationValue * 1.5);
+      paint.color = Colors.white.withOpacity(starOpacities[i] * (0.5 + 0.5 * sin(animationValue * 2 * pi)));
+      canvas.drawCircle(Offset(dx, dy), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant StarfieldPainter oldDelegate) => true;
 }

@@ -1,4 +1,3 @@
-
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -22,12 +21,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final PageController _pageController = PageController(viewportFraction: 0.9);
   double _currentPage = 0.0;
+  User? _currentUser;
 
   final List<_CardData> cards = [
     _CardData(
       imagePath: 'assets/images/welcome_image.png',
       title: 'Trilingo',
-      description: 'Explore Flights, Hotels, Food, Languages, and our AI Chatbot in one galactic app! 🌌\n\n Slide to Continue ➟ ',
+      description:
+          'Explore Flights, Hotels, Food, Languages, and our AI Chatbot in one galactic app! 🌌\n\n Slide to Continue ➟ ',
       targetPage: const SizedBox.shrink(),
     ),
     _CardData(
@@ -70,12 +71,19 @@ class _HomePageState extends State<HomePage> {
         _currentPage = _pageController.page ?? 0.0;
       });
     });
+
+    _currentUser = widget.user;
+    FirebaseAuth.instance.userChanges().listen((user) {
+      setState(() {
+        _currentUser = user;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final displayName = widget.user?.displayName ?? "Galactic Traveler";
-    final photoURL = widget.user?.photoURL ?? "";
+    final displayName = _currentUser?.displayName ?? "Galactic Traveler";
+    final photoURL = _currentUser?.photoURL ?? "";
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -104,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ProfilePage(user: widget.user),
+                            builder: (context) => ProfilePage(user: _currentUser),
                           ),
                         );
                       },
@@ -226,7 +234,7 @@ class _HomePageState extends State<HomePage> {
                         children: List.generate(cards.length, (index) {
                           return AnimatedContainer(
                             duration: Duration(milliseconds: 100),
-                            margin: EdgeInsets.symmetric(horizontal: 5,vertical: 25),
+                            margin: EdgeInsets.symmetric(horizontal: 5, vertical: 25),
                             width: 10,
                             height: 10,
                             decoration: BoxDecoration(
@@ -348,7 +356,6 @@ class AnimatedCard extends StatelessWidget {
   }
 }
 
-
 class AnimatedSpaceBackground extends StatefulWidget {
   const AnimatedSpaceBackground({super.key});
   @override
@@ -420,3 +427,4 @@ class StarfieldPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant StarfieldPainter oldDelegate) => true;
 }
+
