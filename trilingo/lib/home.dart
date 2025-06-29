@@ -1,7 +1,8 @@
+
 import 'dart:math';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:trilingo/home_widgets/chatgpt_chatbot.dart';
 import 'package:trilingo/home_widgets/food_beverages_page.dart';
@@ -12,7 +13,6 @@ import 'package:trilingo/home_widgets/language_translator_page.dart';
 
 class HomePage extends StatefulWidget {
   final User? user;
-
   HomePage({this.user});
 
   @override
@@ -25,43 +25,39 @@ class _HomePageState extends State<HomePage> {
 
   final List<_CardData> cards = [
     _CardData(
+      imagePath: 'assets/images/welcome_image.png',
+      title: 'Trilingo',
+      description: 'Explore Flights, Hotels, Food, Languages, and our AI Chatbot in one galactic app! 🌌\n\n Slide to Continue ➟ ',
+      targetPage: const SizedBox.shrink(),
+    ),
+    _CardData(
       imagePath: 'assets/images/flight_booking.png',
       title: 'Flight Bookings',
-      description:
-          'Embark on interstellar journeys with ease. Discover the universe through hassle-free flight bookings, making your cosmic voyages seamless and delightful.',
-      backgroundColors: [Color(0xFFFFE0B2), Color(0xFFFFD699)],
+      description: 'Embark on interstellar journeys with ease... 🚀\n\nTap to Continue',
       targetPage: FlightBookingsPage(),
     ),
     _CardData(
       imagePath: 'assets/images/hotel_booking.png',
       title: 'Hotel Bookings',
-      description:
-          'Indulge in celestial hospitality. Experience luxury and comfort at our cosmic hotels, where you can relax and unwind while exploring the wonders of the universe.',
-      backgroundColors: [Color(0xFFFFCCD2), Color(0xFFFFB5BD)],
+      description: 'Indulge in celestial hospitality... 🛸\n\nTap to Continue',
       targetPage: HotelBookingsPage(),
-    ),
-    _CardData(
-      imagePath: 'assets/images/language_translator.png',
-      title: 'Language Translator',
-      description:
-          'Break down language barriers across galaxies. Communicate effortlessly with beings from different star systems using our advanced language translation technology.',
-      backgroundColors: [Color(0xFFD4E6FF), Color(0xFFAEC7FF)],
-      targetPage: LanguageTranslatorPage(),
     ),
     _CardData(
       imagePath: 'assets/images/food_beverages.png',
       title: 'Food and Beverages',
-      description:
-          'Savor exotic cosmic delicacies. Immerse yourself in the flavors of the universe with our wide range of intergalactic cuisines, prepared by master chefs from across the galaxies.',
-      backgroundColors: [Color(0xFFE0E5FF), Color(0xFFD1E1FF)],
+      description: 'Savor exotic cosmic delicacies... 🍽️\n\nTap to Continue',
       targetPage: FoodBeveragesPage(),
+    ),
+    _CardData(
+      imagePath: 'assets/images/language_translator.png',
+      title: 'Language Translator',
+      description: 'Break down language barriers across galaxies... 🌌\n\nTap to Continue',
+      targetPage: LanguageTranslatorPage(),
     ),
     _CardData(
       imagePath: 'assets/images/ai_chatbot.png',
       title: 'AI Chatbot',
-      description:
-          'Communicate with our AI Chatbot to get instant assistance and answers to your questions. Whether it\'s travel information or general queries, our AI Chatbot is here to help you.',
-      backgroundColors: [Color(0xFFFFE89F), Color(0xFFFFD699)],
+      description: 'Communicate with our AI companion... 🤖\n\nTap to Continue',
       targetPage: ChatPage(),
     ),
   ];
@@ -78,109 +74,185 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFE3F2FD),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProfilePage(user: widget.user),
-                      ),
-                    );
-                  },
-                  child: CircleAvatar(
-                    backgroundImage: NetworkImage(widget.user?.photoURL ?? ''),
-                    radius: 36,
-                  ),
-                ),
-                SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome,',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      widget.user?.displayName ?? 'User',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 80),
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: cards.length,
-                      itemBuilder: (context, index) {
-                        final card = cards[index % cards.length];
-                        final rotationY = (_currentPage - index).clamp(-1.0, 1.0);
-                        final scale = 1.0 - rotationY.abs() * 0.2;
+    final displayName = widget.user?.displayName ?? "Galactic Traveler";
+    final photoURL = widget.user?.photoURL ?? "";
 
-                        return Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()
-                            ..setEntry(3, 2, 0.001)
-                            ..rotateY(rotationY * pi / 2)
-                            ..scale(scale),
-                          child: GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => card.targetPage),
-                            ),
-                            child: AnimatedCard(
-                              imagePath: card.imagePath,
-                              title: card.title,
-                              description: card.description,
-                              backgroundColors: card.backgroundColors,
-                            ),
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AnimatedSpaceBackground()),
+          Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.center,
+                colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
+                radius: 1.2,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProfilePage(user: widget.user),
                           ),
                         );
                       },
+                      child: photoURL.isNotEmpty
+                          ? CircleAvatar(
+                              backgroundImage: NetworkImage(photoURL),
+                              radius: 36,
+                            )
+                          : Container(
+                              width: 72,
+                              height: 72,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: SweepGradient(
+                                  colors: [
+                                    Colors.cyanAccent,
+                                    Colors.blueAccent,
+                                    Colors.purpleAccent,
+                                    Colors.cyanAccent
+                                  ],
+                                  stops: [0.0, 0.5, 0.9, 1.0],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.cyanAccent.withOpacity(0.8),
+                                    blurRadius: 12,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: 65,
+                                  height: 65,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.black,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      displayName[0].toUpperCase(),
+                                      style: GoogleFonts.orbitron(
+                                        fontSize: 28,
+                                        color: Colors.cyanAccent,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                     ),
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(cards.length, (index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        width: 10,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: index == _currentPage.round()
-                              ? Colors.blueAccent
-                              : Colors.grey.withOpacity(0.5),
+                    SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome,',
+                          style: GoogleFonts.orbitron(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      );
-                    }),
+                        Text(
+                          displayName,
+                          style: GoogleFonts.orbitron(
+                            color: Colors.lightBlueAccent,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 40),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemCount: cards.length,
+                          itemBuilder: (context, index) {
+                            final card = cards[index];
+                            final rotationY = (_currentPage - index).clamp(-1.0, 1.0);
+                            final scale = 1.0 - rotationY.abs() * 0.2;
+
+                            return Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.identity()
+                                ..setEntry(3, 2, 0.001)
+                                ..rotateY(rotationY * pi / 2)
+                                ..scale(scale),
+                              child: GestureDetector(
+                                onTap: () {
+                                  if (card.targetPage is! SizedBox) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => card.targetPage,
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: AnimatedCard(
+                                  imagePath: card.imagePath,
+                                  title: card.title,
+                                  description: card.description,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(cards.length, (index) {
+                          return AnimatedContainer(
+                            duration: Duration(milliseconds: 100),
+                            margin: EdgeInsets.symmetric(horizontal: 5,vertical: 25),
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: index == _currentPage.round()
+                                  ? Colors.cyanAccent
+                                  : Colors.white24,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                if (index == _currentPage.round())
+                                  BoxShadow(
+                                    color: Colors.cyanAccent,
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -190,14 +262,12 @@ class _CardData {
   final String imagePath;
   final String title;
   final String description;
-  final List<Color> backgroundColors;
   final Widget targetPage;
 
   _CardData({
     required this.imagePath,
     required this.title,
     required this.description,
-    required this.backgroundColors,
     required this.targetPage,
   });
 }
@@ -206,92 +276,69 @@ class AnimatedCard extends StatelessWidget {
   final String imagePath;
   final String title;
   final String description;
-  final List<Color> backgroundColors;
 
-  AnimatedCard({
+  const AnimatedCard({
     required this.imagePath,
     required this.title,
     required this.description,
-    required this.backgroundColors,
   });
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final double cardHeight = screenHeight * 0.6;
-    final double cardWidth = screenWidth * 0.9;
-
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-      width: cardWidth,
-      height: cardHeight,
+      margin: EdgeInsets.symmetric(vertical: 20),
+      width: screenWidth * 0.88,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: backgroundColors,
-        ),
         borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.cyanAccent.withOpacity(0.5), width: 3),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.05),
+            Colors.cyan.withOpacity(0.05),
+          ],
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 15,
+            color: Colors.cyanAccent.withOpacity(0.4),
+            blurRadius: 16,
             spreadRadius: 1,
-            offset: Offset(0, 3),
+            offset: Offset(0, 6),
           ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(25),
-          ),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.orbitron(
+                  fontSize: 26,
                   color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 14),
-              Align(
-                alignment: Alignment.topCenter,
-                child: Image.asset(
-                  imagePath,
-                  height: 400,
-                  width: 300,
-                  fit: BoxFit.contain,
-                ),
+              const SizedBox(height: 20),
+              Image.asset(
+                imagePath,
+                height: 220,
+                fit: BoxFit.contain,
               ),
-              SizedBox(height: 10),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SingleChildScrollView(
-                    physics: BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.justify,
-                      ),
-                    ),
-                  ),
+              const SizedBox(height: 25),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white70,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -299,4 +346,77 @@ class AnimatedCard extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class AnimatedSpaceBackground extends StatefulWidget {
+  const AnimatedSpaceBackground({super.key});
+  @override
+  State<AnimatedSpaceBackground> createState() => _AnimatedSpaceBackgroundState();
+}
+
+class _AnimatedSpaceBackgroundState extends State<AnimatedSpaceBackground> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late List<Offset> starPositions;
+  late List<double> starOpacities;
+  final int numStars = 150;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+    final random = Random();
+    starPositions = List.generate(numStars, (_) => Offset(random.nextDouble(), random.nextDouble()));
+    starOpacities = List.generate(numStars, (_) => random.nextDouble() * 0.6 + 0.4);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        return CustomPaint(
+          painter: StarfieldPainter(
+            animationValue: _controller.value,
+            starPositions: starPositions,
+            starOpacities: starOpacities,
+          ),
+          size: Size.infinite,
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+}
+
+class StarfieldPainter extends CustomPainter {
+  final double animationValue;
+  final List<Offset> starPositions;
+  final List<double> starOpacities;
+
+  StarfieldPainter({
+    required this.animationValue,
+    required this.starPositions,
+    required this.starOpacities,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    for (int i = 0; i < starPositions.length; i++) {
+      final dx = starPositions[i].dx * size.width;
+      final dy = starPositions[i].dy * size.height;
+      final radius = 0.8 + (animationValue * 1.5);
+      paint.color = Colors.white.withOpacity(starOpacities[i] * (0.5 + 0.5 * sin(animationValue * 2 * pi)));
+      canvas.drawCircle(Offset(dx, dy), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant StarfieldPainter oldDelegate) => true;
 }
