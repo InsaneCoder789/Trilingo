@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
@@ -15,7 +16,6 @@ class _HotelBookingsPageState extends State<HotelBookingsPage> {
   DateTime? checkInDate;
   DateTime? checkOutDate;
   String destination = '';
-
   List<dynamic> hotels = [];
   bool isLoading = false;
 
@@ -24,6 +24,20 @@ class _HotelBookingsPageState extends State<HotelBookingsPage> {
       context: context,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(Duration(days: 365)),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.dark(
+            primary: Colors.cyanAccent,
+            onPrimary: Colors.black,
+            surface: Colors.grey[900]!,
+            onSurface: Colors.cyanAccent,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(foregroundColor: Colors.cyanAccent),
+          ),
+        ),
+        child: child!,
+      ),
     );
     if (selectedDates != null) {
       setState(() {
@@ -38,266 +52,122 @@ class _HotelBookingsPageState extends State<HotelBookingsPage> {
   }
 
   void _openHotelDetails(dynamic hotel) {
+    final imageUrl = hotel['images']?.isNotEmpty == true
+        ? 'https://${hotel['images'][0]['path']}'
+        : null;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black.withOpacity(0.9),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) {
-        final imageUrl = hotel['images']?.isNotEmpty == true
-            ? 'https://${hotel['images'][0]['path']}'
-            : null;
-
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (imageUrl != null)
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(imageUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    imageUrl,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              SizedBox(height: 12),
-              Text(hotel['name'] ?? 'Unnamed', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text('Category: ${hotel['categoryCode']}'),
-              Text('Zone: ${hotel['zoneName']}'),
-              Text('Price: \$${hotel['minRate'] ?? '--'}'),
               SizedBox(height: 16),
+              Text(hotel['name'] ?? 'Unnamed',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.cyanAccent,
+                      fontFamily: 'Orbitron')),
+              SizedBox(height: 8),
+              Text('Category: ${hotel['categoryCode'] ?? "N/A"}',
+                  style: TextStyle(color: Colors.white70)),
+              Text('Zone: ${hotel['zoneName'] ?? "Unknown"}',
+                  style: TextStyle(color: Colors.white70)),
+              Text('Price: \$${hotel['minRate'] ?? "--"}',
+                  style: TextStyle(color: Colors.greenAccent)),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: Text('Book'),
-              ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  child: Text('Book', style: TextStyle(fontSize: 18)),
+                ),
+              )
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
+  }
+
+  Future<void> _searchHotels() async {
+    if (destination.isEmpty || checkInDate == null || checkOutDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final result = await HotelApiService.searchHotels(
+      destination: destination,
+      checkIn: checkInDate!,
+      checkOut: checkOutDate!,
+      adults: adultsCount,
+      children: childrenCount,
+    );
+
+    setState(() {
+      hotels = result;
+      isLoading = false;
+    });
+
+    if (hotels.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No hotels found or invalid destination.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text('Hotel Bookings'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.cyanAccent),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(color: Colors.black.withOpacity(0.25)),
-          ),
+          const AnimatedSpaceBackground(),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Text('Search Hotels',
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
-                  SizedBox(height: 20),
-                  TextField(
-                    onChanged: (val) => destination = val.toLowerCase(),
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Enter destination (e.g., London)',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      prefixIcon: Icon(Icons.location_on, color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
+                  _buildInputCard(),
                   SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Adults', style: TextStyle(color: Colors.white)),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.remove, color: Colors.white),
-                                  onPressed: adultsCount > 1
-                                      ? () => setState(() => adultsCount--)
-                                      : null,
-                                ),
-                                Text('$adultsCount', style: TextStyle(color: Colors.white)),
-                                IconButton(
-                                  icon: Icon(Icons.add, color: Colors.white),
-                                  onPressed: () => setState(() => adultsCount++),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Children', style: TextStyle(color: Colors.white)),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.remove, color: Colors.white),
-                                  onPressed: childrenCount > 0
-                                      ? () => setState(() => childrenCount--)
-                                      : null,
-                                ),
-                                Text('$childrenCount', style: TextStyle(color: Colors.white)),
-                                IconButton(
-                                  icon: Icon(Icons.add, color: Colors.white),
-                                  onPressed: () => setState(() => childrenCount++),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  ElevatedButton(
-                    onPressed: _selectDateRange,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text('Select Dates'),
-                  ),
-                  if (checkInDate != null && checkOutDate != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        'Selected: ${_formatDate(checkInDate!)} → ${_formatDate(checkOutDate!)}',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      if (destination.isEmpty || checkInDate == null || checkOutDate == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Please fill all fields')),
-                        );
-                        return;
-                      }
-
-                      setState(() => isLoading = true);
-
-                      final result = await HotelApiService.searchHotels(
-                        destination: destination,
-                        checkIn: checkInDate!,
-                        checkOut: checkOutDate!,
-                        adults: adultsCount,
-                        children: childrenCount,
-                      );
-
-                      setState(() {
-                        hotels = result;
-                        isLoading = false;
-                      });
-
-                      if (hotels.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('No hotels found or invalid destination.')),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 14, 56, 1),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    icon: Icon(Icons.search),
-                    label: Text('Search'),
-                  ),
-                  SizedBox(height: 16),
-                  Expanded(
-                    child: isLoading
-                        ? Center(child: CircularProgressIndicator(color: Colors.white))
-                        : hotels.isEmpty
-                            ? Center(child: Text('No results', style: TextStyle(color: Colors.white)))
-                            : ListView.builder(
-                                itemCount: hotels.length,
-                                itemBuilder: (context, index) {
-                                  final hotel = hotels[index];
-                                  final name = hotel['name'] ?? 'Unnamed';
-                                  final category = hotel['categoryCode'] ?? 'Unrated';
-                                  final zone = hotel['zoneName'] ?? 'Unknown Zone';
-                                  final price = hotel['minRate'] ?? '--';
-                                  final imageUrl = hotel['images']?.isNotEmpty == true
-                                      ? 'https://${hotel['images'][0]['path']}'
-                                      : null;
-
-                                  return GestureDetector(
-                                    onTap: () => _openHotelDetails(hotel),
-                                    child: Card(
-                                      color: Colors.white.withOpacity(0.9),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      margin: EdgeInsets.symmetric(vertical: 8),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12.0),
-                                        child: Row(
-                                          children: [
-                                            if (imageUrl != null)
-                                              ClipRRect(
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: Image.network(imageUrl, width: 80, height: 80, fit: BoxFit.cover),
-                                              )
-                                            else
-                                              Icon(Icons.hotel, size: 64, color: Colors.blueAccent),
-                                            SizedBox(width: 12),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
-                                                  SizedBox(height: 4),
-                                                  Text('Category: $category • Area: $zone'),
-                                                  Text('Price: \$${price}')
-                                                ],
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                  ),
+                  Expanded(child: _buildHotelResults()),
                 ],
               ),
             ),
@@ -306,6 +176,324 @@ class _HotelBookingsPageState extends State<HotelBookingsPage> {
       ),
     );
   }
+
+  Widget _buildInputCard() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.cyanAccent.withOpacity(0.8),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyanAccent.withOpacity(0.25),
+            blurRadius: 12,
+            spreadRadius: 1,
+            offset: Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          TextField(
+            onChanged: (val) => destination = val.toLowerCase(),
+            style: TextStyle(color: Colors.cyanAccent, fontFamily: 'Orbitron'),
+            decoration: InputDecoration(
+              hintText: 'Enter destination (e.g., Tokyo)',
+              hintStyle: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Orbitron'),
+              prefixIcon: Icon(Icons.location_on, color: Colors.white),
+              filled: true,
+              fillColor: Colors.white.withOpacity(0.05),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.cyanAccent, width: 2),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide:
+                    BorderSide(color: Colors.white, width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.cyanAccent, width: 3),
+              ),
+            ),
+          ),
+          SizedBox(height: 22),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildNumberSelector(
+                label: 'Adults',
+                value: adultsCount,
+                min: 1,
+                onDecrement: () => setState(() {
+                  if (adultsCount > 1) adultsCount--;
+                }),
+                onIncrement: () => setState(() => adultsCount++),
+              ),
+              _buildNumberSelector(
+                label: 'Children',
+                value: childrenCount,
+                min: 0,
+                onDecrement: () => setState(() {
+                  if (childrenCount > 0) childrenCount--;
+                }),
+                onIncrement: () => setState(() => childrenCount++),
+              ),
+            ],
+          ),
+          SizedBox(height: 22),
+          ElevatedButton(
+            onPressed: _selectDateRange,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.cyanAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 15,
+              shadowColor: Colors.cyanAccent.withOpacity(0.9),
+              padding: EdgeInsets.symmetric(vertical: 15,horizontal: 50),
+            ),
+            child: Text(
+              checkInDate != null && checkOutDate != null
+                  ? 'Selected: ${_formatDate(checkInDate!)} → ${_formatDate(checkOutDate!)}'
+                  : 'Select Dates',
+              style: TextStyle(
+                fontFamily: 'Orbitron',
+                fontSize: 16,
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(height: 18),
+          ElevatedButton.icon(
+            onPressed: isLoading ? null : _searchHotels,
+            icon: Icon(Icons.search),
+            label: Text('Search Hotels', style: TextStyle(fontFamily: 'Orbitron')),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurpleAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              elevation: 10,
+              shadowColor: Colors.deepPurpleAccent.withOpacity(0.8),
+              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 90),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNumberSelector({
+    required String label,
+    required int value,
+    required int min,
+    required VoidCallback onIncrement,
+    required VoidCallback onDecrement,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontFamily: 'Orbitron',
+                fontSize: 16,
+                color: Colors.white,
+                fontWeight: FontWeight.w600)),
+        SizedBox(height: 6),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.cyanAccent.withOpacity(0.8), width: 2),
+            color: Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove, color: Colors.redAccent),
+                onPressed: value > min ? onDecrement : null,
+              ),
+              Text(
+                value.toString(),
+                style: TextStyle(
+                    fontFamily: 'Orbitron',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              IconButton(
+                icon: Icon(Icons.add, color: Colors.greenAccent),
+                onPressed: onIncrement,
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildHotelResults() {
+    if (isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: Colors.cyanAccent,
+          strokeWidth: 4,
+        ),
+      );
+    }
+    if (hotels.isEmpty) {
+      return Center(
+        child: Text(
+          'No results',
+          style: TextStyle(
+            color: Colors.cyanAccent.withOpacity(0.5),
+            fontSize: 20,
+            fontFamily: 'Orbitron',
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      itemCount: hotels.length,
+      itemBuilder: (context, index) {
+        final hotel = hotels[index];
+        final imageUrl = (hotel['images']?.isNotEmpty == true)
+            ? 'https://${hotel['images'][0]['path']}'
+            : null;
+        return GestureDetector(
+          onTap: () => _openHotelDetails(hotel),
+          child: Container(
+            margin: EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.cyanAccent, width: 2),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.blue.withOpacity(0.07),
+                  Colors.cyanAccent.withOpacity(0.2),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: ListTile(
+              leading: imageUrl != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
+                    )
+                  : Icon(Icons.hotel, color: Colors.cyanAccent),
+              title: Text(
+                hotel['name'] ?? 'Unnamed Hotel',
+                style: TextStyle(color: Colors.cyanAccent, fontFamily: 'Orbitron'),
+              ),
+              subtitle: Text(
+                hotel['zoneName'] ?? 'Unknown Zone',
+                style: TextStyle(color: Colors.white70),
+              ),
+              trailing: Text(
+                '\$${hotel['minRate'] ?? '--'}',
+                style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+class AnimatedSpaceBackground extends StatefulWidget {
+  const AnimatedSpaceBackground({super.key});
+
+  @override
+  State<AnimatedSpaceBackground> createState() => _AnimatedSpaceBackgroundState();
+}
+
+class _AnimatedSpaceBackgroundState extends State<AnimatedSpaceBackground> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final List<_Star> _stars;
+
+  @override
+  void initState() {
+    super.initState();
+    _stars = List.generate(150, (index) => _Star.random());
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 10))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: _StarPainter(_stars, _controller.value),
+          child: Container(),
+        );
+      },
+    );
+  }
+}
+
+class _Star {
+  Offset position;
+  double radius;
+  Color color;
+  double twinkleSpeed;
+
+  _Star({
+    required this.position,
+    required this.radius,
+    required this.color,
+    required this.twinkleSpeed,
+  });
+
+  factory _Star.random() {
+    final random = Random();
+    return _Star(
+      position: Offset(random.nextDouble(), random.nextDouble()),
+      radius: random.nextDouble() * 1.5 + 0.5,
+      color: Colors.white,
+      twinkleSpeed: random.nextDouble() * 2 + 1,
+    );
+  }
+}
+
+class _StarPainter extends CustomPainter {
+  final List<_Star> stars;
+  final double animationValue;
+
+  _StarPainter(this.stars, this.animationValue);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    for (var star in stars) {
+      final alpha = (0.5 + 0.5 * sin(animationValue * 2 * pi * star.twinkleSpeed)) * 255;
+      paint.color = star.color.withAlpha(alpha.toInt());
+      canvas.drawCircle(
+        Offset(star.position.dx * size.width, star.position.dy * size.height),
+        star.radius,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _StarPainter oldDelegate) => true;
 }
 
 class HotelApiService {
