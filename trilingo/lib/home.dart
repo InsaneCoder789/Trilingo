@@ -3,25 +3,41 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trilingo/home_widgets/chatgpt_chatbot.dart';
 import 'package:trilingo/home_widgets/food_beverages_page.dart';
-import 'profile_page.dart';
+import 'package:trilingo/profile_page.dart';
 import 'package:trilingo/home_widgets/flight_bookings_page.dart';
 import 'package:trilingo/home_widgets/hotel_bookings_page.dart';
 import 'package:trilingo/home_widgets/language_translator_page.dart';
 
 class HomePage extends StatefulWidget {
   final User? user;
-  HomePage({this.user});
+  const HomePage({super.key, this.user});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   final PageController _pageController = PageController(viewportFraction: 0.9);
   double _currentPage = 0.0;
   User? _currentUser;
+  int? avatarIndex;
+
+  // List of Material Icons for avatars
+  final List<IconData> _avatarIcons = [
+    Icons.pets,
+    Icons.android,
+    Icons.face,
+    Icons.rocket_launch,
+    Icons.auto_awesome,
+    Icons.catching_pokemon,
+    Icons.emoji_nature,
+    Icons.bug_report,
+    Icons.star,
+    Icons.waves,
+  ];
 
   final List<_CardData> cards = [
     _CardData(
@@ -73,17 +89,113 @@ class _HomePageState extends State<HomePage> {
     });
 
     _currentUser = widget.user;
+
     FirebaseAuth.instance.userChanges().listen((user) {
       setState(() {
         _currentUser = user;
       });
+      if (user != null && !_isGoogleUser(user)) {
+        _fetchAvatarIndex(user.uid);
+      }
     });
+
+    if (_currentUser != null && !_isGoogleUser(_currentUser!)) {
+      _fetchAvatarIndex(_currentUser!.uid);
+    }
+  }
+
+  bool _isGoogleUser(User user) {
+    // Check if user is signed in with a Gmail Google account
+    final email = user.email ?? '';
+    return email.endsWith('@gmail.com');
+  }
+
+  Future<void> _fetchAvatarIndex(String uid) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists && doc.data() != null && doc.data()!.containsKey('avatarIndex')) {
+        setState(() {
+          avatarIndex = doc['avatarIndex'];
+        });
+      }
+    } catch (e) {
+      print("Error fetching avatarIndex: $e");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final displayName = _currentUser?.displayName ?? "Galactic Traveler";
     final photoURL = _currentUser?.photoURL ?? "";
+
+    Widget buildGlowingAvatar(Widget child) {
+      return Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const SweepGradient(
+            colors: [Colors.cyanAccent, Colors.blueAccent, Colors.purpleAccent, Colors.cyanAccent],
+            stops: [0.0, 0.5, 0.9, 1.0],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.cyanAccent.withOpacity(0.8),
+              blurRadius: 12,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: child,
+      );
+    }
+
+    late final Widget avatarWidget;
+
+    if (photoURL.isNotEmpty && _isGoogleUser(_currentUser!)) {
+      // Google user with photoURL
+      avatarWidget = buildGlowingAvatar(
+        CircleAvatar(
+          backgroundImage: NetworkImage(photoURL),
+          radius: 36,
+          backgroundColor: Colors.transparent,
+        ),
+      );
+    } else if (avatarIndex != null && avatarIndex! >= 0 && avatarIndex! < _avatarIcons.length) {
+      // Show icon avatar for non-Google users with avatarIndex
+      avatarWidget = buildGlowingAvatar(
+        CircleAvatar(
+          radius: 36,
+          backgroundColor: Colors.black,
+          child: Icon(
+            _avatarIcons[avatarIndex!],
+            size: 36,
+            color: Colors.cyanAccent,
+          ),
+        ),
+      );
+    } else {
+      // Fallback: show initial letter avatar
+      avatarWidget = buildGlowingAvatar(
+        Container(
+          width: 72,
+          height: 72,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.black,
+          ),
+          child: Center(
+            child: Text(
+              displayName.isNotEmpty ? displayName[0].toUpperCase() : 'G',
+              style: GoogleFonts.orbitron(
+                fontSize: 28,
+                color: Colors.cyanAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -116,56 +228,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                         );
                       },
-                      child: photoURL.isNotEmpty
-                          ? CircleAvatar(
-                              backgroundImage: NetworkImage(photoURL),
-                              radius: 36,
-                            )
-                          : Container(
-                              width: 72,
-                              height: 72,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: SweepGradient(
-                                  colors: [
-                                    Colors.cyanAccent,
-                                    Colors.blueAccent,
-                                    Colors.purpleAccent,
-                                    Colors.cyanAccent
-                                  ],
-                                  stops: [0.0, 0.5, 0.9, 1.0],
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.cyanAccent.withOpacity(0.8),
-                                    blurRadius: 12,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Container(
-                                  width: 65,
-                                  height: 65,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.black,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      displayName[0].toUpperCase(),
-                                      style: GoogleFonts.orbitron(
-                                        fontSize: 28,
-                                        color: Colors.cyanAccent,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                      child: avatarWidget,
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -173,7 +238,7 @@ class _HomePageState extends State<HomePage> {
                           'Welcome,',
                           style: GoogleFonts.orbitron(
                             color: Colors.white,
-                            fontSize: 20,
+                            fontSize: 30,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -181,14 +246,14 @@ class _HomePageState extends State<HomePage> {
                           displayName,
                           style: GoogleFonts.orbitron(
                             color: Colors.lightBlueAccent,
-                            fontSize: 18,
+                            fontSize: 25,
                           ),
                         ),
                       ],
                     ),
                   ],
                 ),
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
                 Expanded(
                   child: Column(
                     children: [
@@ -212,47 +277,75 @@ class _HomePageState extends State<HomePage> {
                                   if (card.targetPage is! SizedBox) {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(
-                                        builder: (context) => card.targetPage,
-                                      ),
+                                      MaterialPageRoute(builder: (context) => card.targetPage),
                                     );
                                   }
                                 },
-                                child: AnimatedCard(
-                                  imagePath: card.imagePath,
-                                  title: card.title,
-                                  description: card.description,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.4), // translucent black
+                                        borderRadius: BorderRadius.circular(24),
+                                        border: Border.all(
+                                          color: Colors.cyanAccent.withOpacity(0.3),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(vertical: 45, horizontal: 16),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(20),
+                                            child: Image.asset(
+                                              card.imagePath,
+                                              height: 200,  // reduced height for smaller image
+                                              width: double.infinity,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 15), // some extra vertical space
+                                          Text(
+                                            card.title,
+                                            style: GoogleFonts.orbitron(
+                                              fontSize: 40, // slightly bigger font size for title
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.cyanAccent,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(height: 14),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                                            child: Text(
+                                              card.description,
+                                              style: GoogleFonts.orbitron(
+                                                fontSize: 17,
+                                                color: Colors.lightBlueAccent,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             );
                           },
                         ),
                       ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(cards.length, (index) {
-                          return AnimatedContainer(
-                            duration: Duration(milliseconds: 100),
-                            margin: EdgeInsets.symmetric(horizontal: 5, vertical: 25),
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: index == _currentPage.round()
-                                  ? Colors.cyanAccent
-                                  : Colors.white24,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                if (index == _currentPage.round())
-                                  BoxShadow(
-                                    color: Colors.cyanAccent,
-                                    blurRadius: 8,
-                                    spreadRadius: 1,
-                                  ),
-                              ],
-                            ),
-                          );
-                        }),
+                      const SizedBox(height: 45),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30),  // Move text up by adding bottom padding here
+                        child: Text(
+                          'Swipe cards left or right to explore',
+                          style: GoogleFonts.orbitron(color: Colors.white70),
+                        ),
                       ),
                     ],
                   ),
@@ -280,118 +373,22 @@ class _CardData {
   });
 }
 
-class AnimatedCard extends StatelessWidget {
-  final String imagePath;
-  final String title;
-  final String description;
-
-  const AnimatedCard({
-    required this.imagePath,
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 20),
-      width: screenWidth * 0.88,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.cyanAccent.withOpacity(0.5), width: 3),
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withOpacity(0.05),
-            Colors.cyan.withOpacity(0.05),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.cyanAccent.withOpacity(0.4),
-            blurRadius: 16,
-            spreadRadius: 1,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.orbitron(
-                  fontSize: 26,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Image.asset(
-                imagePath,
-                height: 220,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(height: 25),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white70,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class AnimatedSpaceBackground extends StatefulWidget {
   const AnimatedSpaceBackground({super.key});
+
   @override
   State<AnimatedSpaceBackground> createState() => _AnimatedSpaceBackgroundState();
 }
 
 class _AnimatedSpaceBackgroundState extends State<AnimatedSpaceBackground> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late List<Offset> starPositions;
-  late List<double> starOpacities;
-  final int numStars = 150;
+  late final AnimationController _controller;
+  late final List<_Star> _stars;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
-    final random = Random();
-    starPositions = List.generate(numStars, (_) => Offset(random.nextDouble(), random.nextDouble()));
-    starOpacities = List.generate(numStars, (_) => random.nextDouble() * 0.6 + 0.4);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (_, __) {
-        return CustomPaint(
-          painter: StarfieldPainter(
-            animationValue: _controller.value,
-            starPositions: starPositions,
-            starOpacities: starOpacities,
-          ),
-          size: Size.infinite,
-        );
-      },
-    );
+    _stars = List.generate(150, (index) => _Star.random());
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 10))..repeat();
   }
 
   @override
@@ -399,32 +396,65 @@ class _AnimatedSpaceBackgroundState extends State<AnimatedSpaceBackground> with 
     _controller.dispose();
     super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: _StarPainter(_stars, _controller.value),
+          child: Container(),
+        );
+      },
+    );
+  }
 }
 
-class StarfieldPainter extends CustomPainter {
-  final double animationValue;
-  final List<Offset> starPositions;
-  final List<double> starOpacities;
+class _Star {
+  Offset position;
+  double radius;
+  Color color;
+  double twinkleSpeed;
 
-  StarfieldPainter({
-    required this.animationValue,
-    required this.starPositions,
-    required this.starOpacities,
+  _Star({
+    required this.position,
+    required this.radius,
+    required this.color,
+    required this.twinkleSpeed,
   });
+
+  factory _Star.random() {
+    final random = Random();
+    return _Star(
+      position: Offset(random.nextDouble(), random.nextDouble()),
+      radius: random.nextDouble() * 1.5 + 0.5,
+      color: Colors.white,
+      twinkleSpeed: random.nextDouble() * 2 + 1,
+    );
+  }
+}
+
+class _StarPainter extends CustomPainter {
+  final List<_Star> stars;
+  final double animationValue;
+
+  _StarPainter(this.stars, this.animationValue);
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
-    for (int i = 0; i < starPositions.length; i++) {
-      final dx = starPositions[i].dx * size.width;
-      final dy = starPositions[i].dy * size.height;
-      final radius = 0.8 + (animationValue * 1.5);
-      paint.color = Colors.white.withOpacity(starOpacities[i] * (0.5 + 0.5 * sin(animationValue * 2 * pi)));
-      canvas.drawCircle(Offset(dx, dy), radius, paint);
+    for (var star in stars) {
+      final alpha = (0.5 + 0.5 * sin(animationValue * 2 * pi * star.twinkleSpeed)) * 255;
+      paint.color = star.color.withAlpha(alpha.toInt());
+      canvas.drawCircle(
+        Offset(star.position.dx * size.width, star.position.dy * size.height),
+        star.radius,
+        paint,
+      );
     }
   }
 
   @override
-  bool shouldRepaint(covariant StarfieldPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _StarPainter oldDelegate) => true;
 }
-

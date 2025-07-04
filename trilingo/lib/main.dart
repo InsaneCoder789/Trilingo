@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'signup_page.dart';
 import 'home.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -21,6 +22,17 @@ Future<void> main() async {
       },
     );
     print("✅ Firebase initialized successfully");
+
+    FirebaseFirestore.instance.settings = const Settings(
+      host: 'nam5-firestore.googleapis.com',
+      sslEnabled: true,
+      persistenceEnabled: true,
+    );
+
+    print("🛰 Firestore settings applied for region nam5");
+
+    final user = FirebaseAuth.instance.currentUser;
+    print("🔐 FirebaseAuth current user: ${user?.email ?? 'Not signed in'}");
   } catch (e, stackTrace) {
     print("❌ Firebase initialization failed: $e");
     print(stackTrace);
@@ -49,9 +61,12 @@ class MyApp extends StatelessWidget {
         '/': (context) => ImageSplashScreen(googleSignIn: googleSignIn),
         '/welcome': (context) => Onboarding1Widget(),
         '/signup': (context) => SignupPage(),
-        '/home': (context) =>
-            HomePage(user: ModalRoute.of(context)?.settings.arguments as User?),
-      },
+        '/home': (context) {
+  final args = ModalRoute.of(context)?.settings.arguments;
+  final user = args is User ? args : null;
+  return HomePage(user: user);
+},
+        },
     );
   }
 }
