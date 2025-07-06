@@ -1,364 +1,272 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:http/http.dart' as http;
+import 'package:trilingo/ui/widgets/spacethemeui.dart';
 
 class LanguageTranslatorPage extends StatefulWidget {
+  const LanguageTranslatorPage({Key? key}) : super(key: key);
+
   @override
-  _LanguageTranslatorPageState createState() => _LanguageTranslatorPageState();
+  State<LanguageTranslatorPage> createState() => _LanguageTranslatorPageState();
 }
 
 class _LanguageTranslatorPageState extends State<LanguageTranslatorPage>
     with SingleTickerProviderStateMixin {
-  final stt.SpeechToText _speech = stt.SpeechToText();
-  final FlutterTts _flutterTts = FlutterTts();
-
-  bool isListening = false;
-  String recognizedText = '';
-  String translatedText = '';
-  String fromLanguageCode = 'auto';
-  String toLanguageCode = 'es';
-  List<Map<String, String>> translationHistory = [];
-
   final List<Map<String, String>> languages = [
-    {'name': 'Auto Detect', 'code': 'auto'},
-    {'name': 'English', 'code': 'en'},
-    {'name': 'Spanish', 'code': 'es'},
-    {'name': 'French', 'code': 'fr'},
-    {'name': 'German', 'code': 'de'},
-    {'name': 'Hindi', 'code': 'hi'},
-    {'name': 'Japanese', 'code': 'ja'},
-    {'name': 'Chinese', 'code': 'zh-CN'},
-    {'name': 'Korean', 'code': 'ko'},
-    {'name': 'Arabic', 'code': 'ar'},
-    {'name': 'Russian', 'code': 'ru'},
+    {'code': 'en', 'name': 'English'},
+    {'code': 'es', 'name': 'Spanish'},
+    {'code': 'fr', 'name': 'French'},
+    {'code': 'de', 'name': 'German'},
+    {'code': 'zh', 'name': 'Chinese'},
+    {'code': 'hi', 'name': 'Hindi'},
   ];
 
-  late final AnimationController _controller;
-  late final Timer _twinkleTimer;
-  final Random _random = Random();
-  final List<_Star> _stars = [];
+  String fromLanguageCode = 'en';
+  String toLanguageCode = 'es';
 
-  late AnimationController _micAnimationController;
-  late Animation<double> _micGlowAnimation;
+  String recognizedText = '';
+  String translatedText = '';
+
+  final TextEditingController typingController = TextEditingController();
+
+  late stt.SpeechToText speech;
+  bool isListening = false;
+
+  final FlutterTts flutterTts = FlutterTts();
+
+  late AnimationController _glowController;
 
   @override
   void initState() {
     super.initState();
+    speech = stt.SpeechToText();
 
-    // Initialize stars for background
-    for (int i = 0; i < 150; i++) {
-      _stars.add(_Star(
-        position: Offset(_random.nextDouble(), _random.nextDouble()),
-        size: _random.nextDouble() * 2 + 0.5,
-        twinklePhase: _random.nextDouble() * 2 * pi,
-      ));
-    }
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 60),
-    )..repeat();
-
-    _twinkleTimer = Timer.periodic(const Duration(milliseconds: 50), (_) {
-      setState(() {});
-    });
-
-    // Mic glowing orb animation controller
-    _micAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    );
-
-    _micGlowAnimation =
-        Tween<double>(begin: 0.4, end: 1.0).animate(CurvedAnimation(
-      parent: _micAnimationController,
-      curve: Curves.easeInOut,
-    ));
-
-    _micAnimationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _micAnimationController.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        _micAnimationController.forward();
-      }
-    });
+    _glowController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 2))
+          ..repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
-    _twinkleTimer.cancel();
-    _micAnimationController.dispose();
+    typingController.dispose();
+    _glowController.dispose();
     super.dispose();
   }
 
-  Future<void> startListening() async {
-    bool available = await _speech.initialize();
-    if (available) {
+  Future<void> translateText() async {
+    if (typingController.text.isNotEmpty) {
       setState(() {
-        isListening = true;
-        _micAnimationController.forward();
-      });
-      _speech.listen(onResult: (result) {
-        setState(() => recognizedText = result.recognizedWords);
+        recognizedText = typingController.text;
       });
     }
-  }
+    String input = recognizedText.trim();
+    if (input.isEmpty) return;
 
-  Future<void> stopListening() async {
-    await _speech.stop();
+    await Future.delayed(const Duration(milliseconds: 800));
+
     setState(() {
-      isListening = false;
-      _micAnimationController.stop();
-      _micAnimationController.value = 0.4;
+      translatedText = '$input [${toLanguageCode.toUpperCase()}] (translated)';
     });
   }
 
-  Future<void> translateText(String text) async {
-    if (text.trim().isEmpty) {
-      setState(() {
-        translatedText = 'Please speak or enter text to translate.';
-      });
-      return;
-    }
-
-    final apiKey = 'YOUR_GOOGLE_CLOUD_TRANSLATE_API_KEY';
-    final url = Uri.parse(
-      'https://translation.googleapis.com/language/translate/v2?key=$apiKey',
+  void startListening() async {
+    bool available = await speech.initialize(
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          setState(() => isListening = false);
+        }
+      },
+      onError: (error) {
+        setState(() => isListening = false);
+      },
     );
-
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'q': text,
-        'source': fromLanguageCode,
-        'target': toLanguageCode,
-        'format': 'text',
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final translated = data['data']['translations'][0]['translatedText'];
-      final detectedSource = data['data']['translations'][0]['detectedSourceLanguage'] ?? fromLanguageCode;
-      setState(() {
-        translatedText = translated;
-        translationHistory.add({
-          'from': recognizedText,
-          'to': translated,
-          'source': detectedSource,
-          'target': toLanguageCode,
-        });
-      });
-    } else {
-      setState(() => translatedText = 'Translation failed.');
+    if (available) {
+      setState(() => isListening = true);
+      speech.listen(
+        onResult: (result) {
+          setState(() {
+            recognizedText = result.recognizedWords;
+            typingController.text = recognizedText;
+          });
+        },
+      );
     }
   }
 
-  Future<void> speakTranslatedText() async {
-    if (translatedText.trim().isEmpty) return;
-    await _flutterTts.setLanguage(toLanguageCode);
-    await _flutterTts.setPitch(1.2);
-    await _flutterTts.setSpeechRate(0.9);
-    await _flutterTts.speak(translatedText);
+  void stopListening() {
+    speech.stop();
+    setState(() => isListening = false);
+  }
+
+  Future<void> speakText() async {
+    if (translatedText.isEmpty) return;
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setSpeechRate(0.9);
+    await flutterTts.speak(translatedText);
   }
 
   @override
   Widget build(BuildContext context) {
+    final double mainBoxWidth = MediaQuery.of(context).size.width * 0.9;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          CustomPaint(
-            size: Size.infinite,
-            painter: _SpacePainter(_stars, _controller.value),
-          ),
+          const AnimatedSpaceBackground(),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 48),
+            child: Center(
               child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Text(
-                      "Language Translator",
-                      style: TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Orbitron',
-                        shadows: [
-                          Shadow(blurRadius: 12, color: Colors.cyanAccent)
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Container(
+                  width: mainBoxWidth,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.75),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.cyanAccent.withOpacity(0.85),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.cyanAccent.withOpacity(0.3),
+                        blurRadius: 16,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back, color: Colors.cyanAccent),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Translate',
+                            style: TextStyle(
+                              color: Colors.cyanAccent,
+                              fontFamily: 'Orbitron',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 60),
-
-                    // Main UI Container
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                            color: Colors.cyanAccent.withOpacity(0.6),
-                            width: 1.8),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.cyanAccent.withOpacity(0.3),
-                              blurRadius: 30,
-                              spreadRadius: 6)
-                        ],
-                        gradient: LinearGradient(
-                          colors: [Colors.black54, Colors.black87],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                      const SizedBox(height: 24),
+                      _buildLanguageRow('From:', fromLanguageCode, (value) {
+                        setState(() => fromLanguageCode = value);
+                      }),
+                      const SizedBox(height: 18),
+                      _buildLanguageRow('To:', toLanguageCode, (value) {
+                        setState(() => toLanguageCode = value);
+                      }, labelSpacing: 24),
+                      const SizedBox(height: 28),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black87,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.cyanAccent.withOpacity(0.85)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.cyanAccent.withOpacity(0.35),
+                              blurRadius: 16,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 0),
+                            ),
+                          ],
+                        ),
+                        child: TextField(
+                          controller: typingController,
+                          style: const TextStyle(
+                            color: Colors.cyanAccent,
+                            fontFamily: 'Orbitron',
+                            fontSize: 16,
+                          ),
+                          cursorColor: Colors.cyanAccent,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                            border: InputBorder.none,
+                            hintText: 'Type text here...',
+                            hintStyle: TextStyle(color: Colors.cyanAccent.withOpacity(0.45)),
+                          ),
+                          onChanged: (val) {
+                            setState(() {
+                              recognizedText = val;
+                            });
+                          },
                         ),
                       ),
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          _buildDropdown("Translate From", fromLanguageCode, true),
-                          const SizedBox(height: 10),
-
-                          // Recognized Speech
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                  color: Colors.cyanAccent.withOpacity(0.6),
-                                  width: 1.5),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  recognizedText.isEmpty
-                                      ? 'Press record and speak...'
-                                      : recognizedText,
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                                const SizedBox(height: 12),
-
-                                // Glowing Mic Button with Orb Animation
-                                GestureDetector(
-                                  onTap: () => isListening
-                                      ? stopListening()
-                                      : startListening(),
-                                  child: AnimatedBuilder(
-                                    animation: _micAnimationController,
-                                    builder: (context, child) {
-                                      return Container(
-                                        width: 80,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          gradient: RadialGradient(
-                                            colors: isListening
-                                                ? [
-                                                    Colors.cyanAccent.withOpacity(
-                                                        _micGlowAnimation.value),
-                                                    Colors.blueAccent.withOpacity(
-                                                        _micGlowAnimation.value),
-                                                  ]
-                                                : [
-                                                    Colors.grey.shade700,
-                                                    Colors.grey.shade900,
-                                                  ],
-                                            stops: const [0.0, 1.0],
-                                          ),
-                                          boxShadow: isListening
-                                              ? [
-                                                  BoxShadow(
-                                                    color: Colors.cyanAccent.withOpacity(
-                                                        _micGlowAnimation.value),
-                                                    blurRadius: 24,
-                                                    spreadRadius: 8,
-                                                  ),
-                                                  BoxShadow(
-                                                    color: Colors.blueAccent.withOpacity(
-                                                        _micGlowAnimation.value),
-                                                    blurRadius: 32,
-                                                    spreadRadius: 12,
-                                                  ),
-                                                ]
-                                              : [],
-                                        ),
-                                        child: Icon(
-                                          isListening ? Icons.stop : Icons.mic,
-                                          size: 36,
-                                          color:
-                                              isListening ? Colors.black : Colors.white,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          _buildDropdown("Translate To", toLanguageCode, false),
-                          const SizedBox(height: 16),
-
-                          ElevatedButton(
-                            onPressed: () => translateText(recognizedText),
-                            child: const Text("Translate",
-                                style: TextStyle(fontSize: 18)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.cyan,
-                              foregroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 120, vertical: 15),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Translated Result
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.black26,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: Colors.cyanAccent.withOpacity(0.6)),
-                            ),
-                            child: Text(
-                              translatedText.isEmpty
-                                  ? 'Translation will appear here.'
-                                  : translatedText,
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 16),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          ElevatedButton.icon(
-                            onPressed: () => speakTranslatedText(),
-                            icon: const Icon(Icons.volume_up),
-                            label: const Text("Speak"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurpleAccent,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 120, vertical: 15),
-                            ),
-                          )
-                        ],
+                      const SizedBox(height: 26),
+                      _buildTextDisplay(
+                        text: recognizedText.isEmpty
+                            ? 'Recognized speech will appear here...'
+                            : recognizedText,
                       ),
-                    )
-                  ],
+                      const SizedBox(height: 24),
+                      GestureDetector(
+                        onTap: () {
+                          if (isListening) {
+                            stopListening();
+                          } else {
+                            startListening();
+                          }
+                        },
+                        child: AnimatedBuilder(
+                          animation: _glowController,
+                          builder: (context, child) {
+                            double glow = isListening ? _glowController.value : 0.4;
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isListening
+                                    ? Colors.cyanAccent.withOpacity(0.9)
+                                    : Colors.black87,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.cyanAccent.withOpacity(glow),
+                                    blurRadius: isListening ? 30 * glow : 10,
+                                    spreadRadius: isListening ? 12 * glow : 2,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                isListening ? Icons.mic : Icons.mic_none,
+                                size: 42,
+                                color: isListening ? Colors.black : Colors.cyanAccent,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      _buildActionButton(
+                        label: 'Translate',
+                        enabled: recognizedText.trim().isNotEmpty,
+                        onPressed: translateText,
+                      ),
+                      const SizedBox(height: 28),
+                      _buildTextDisplay(
+                        text: translatedText.isEmpty
+                            ? 'Translation will appear here'
+                            : translatedText,
+                      ),
+                      const SizedBox(height: 26),
+                      _buildActionButton(
+                        label: 'Speak',
+                        enabled: translatedText.isNotEmpty,
+                        onPressed: speakText,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -368,100 +276,133 @@ class _LanguageTranslatorPageState extends State<LanguageTranslatorPage>
     );
   }
 
-  Widget _buildDropdown(String label, String currentCode, bool isFrom) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildLanguageRow(
+    String label,
+    String currentCode,
+    Function(String) onChanged, {
+    double labelSpacing = 12,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(label,
-            style: const TextStyle(
-              color: Colors.cyanAccent,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Orbitron',
-              fontSize: 14,
-            )),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.cyanAccent.withOpacity(0.7)),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.cyanAccent,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            fontFamily: 'Orbitron',
+            shadows: [
+              Shadow(
+                color: Colors.cyanAccent.withOpacity(0.6),
+                blurRadius: 8,
+              ),
+            ],
           ),
-          child: DropdownButton<String>(
-            value: currentCode,
-            dropdownColor: Colors.black87,
-            iconEnabledColor: Colors.cyanAccent,
-            isExpanded: true,
-            underline: Container(),
-            items: languages.map((lang) {
-              return DropdownMenuItem<String>(
-                value: lang['code'],
-                child: Text(
-                  lang['name']!,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() {
-                if (isFrom) {
-                  fromLanguageCode = value;
-                } else {
-                  toLanguageCode = value;
-                }
-              });
-            },
+        ),
+        SizedBox(width: labelSpacing),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black87,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.cyanAccent.withOpacity(0.75)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.cyanAccent.withOpacity(0.35),
+                    blurRadius: 14,
+                    spreadRadius: 1.5,
+                    offset: const Offset(0, 0),
+                  ),
+                ],
+              ),
+              child: DropdownButton<String>(
+                dropdownColor: Colors.black87,
+                value: currentCode,
+                isExpanded: true,
+                iconEnabledColor: Colors.cyanAccent,
+                style: const TextStyle(color: Colors.cyanAccent, fontFamily: 'Orbitron'),
+                underline: const SizedBox.shrink(),
+                items: languages
+                    .map(
+                      (lang) => DropdownMenuItem<String>(
+                        value: lang['code'],
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(lang['name']!),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) onChanged(value);
+                },
+              ),
+            ),
           ),
         ),
       ],
     );
   }
-}
 
-class _Star {
-  Offset position;
-  double size;
-  double twinklePhase;
-
-  _Star({
-    required this.position,
-    required this.size,
-    required this.twinklePhase,
-  });
-}
-
-class _SpacePainter extends CustomPainter {
-  final List<_Star> stars;
-  final double animationValue;
-
-  _SpacePainter(this.stars, this.animationValue);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-    // Background gradient
-    final gradient = LinearGradient(
-      colors: [Colors.black, Colors.deepPurple.shade900],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
+  Widget _buildTextDisplay({required String text}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.black87,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.cyanAccent.withOpacity(0.85)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyanAccent.withOpacity(0.3),
+            blurRadius: 18,
+            spreadRadius: 3,
+          ),
+        ],
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.cyanAccent,
+          fontSize: 16,
+          fontFamily: 'Orbitron',
+        ),
+      ),
     );
-    final rect = Offset.zero & size;
-    paint.shader = gradient.createShader(rect);
-    canvas.drawRect(rect, paint);
-
-    // Draw stars
-    for (var star in stars) {
-      final twinkle =
-          0.5 + 0.5 * sin(animationValue * 2 * pi + star.twinklePhase);
-      paint.color = Colors.white.withOpacity(twinkle);
-      canvas.drawCircle(
-          Offset(star.position.dx * size.width, star.position.dy * size.height),
-          star.size,
-          paint);
-    }
   }
 
-  @override
-  bool shouldRepaint(covariant _SpacePainter oldDelegate) => true;
+  Widget _buildActionButton({
+    required String label,
+    required bool enabled,
+    required VoidCallback onPressed,
+  }) {
+    return Center(
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.65,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: enabled ? Colors.cyanAccent : Colors.grey[700],
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shadowColor: Colors.cyanAccent.withOpacity(0.8),
+            elevation: enabled ? 14 : 0,
+            textStyle: const TextStyle(
+              fontFamily: 'Orbitron',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          onPressed: enabled ? onPressed : null,
+          child: Text(
+            label,
+            style: TextStyle(color: enabled ? Colors.black : Colors.grey[400]),
+          ),
+        ),
+      ),
+    );
+  }
 }
