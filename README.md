@@ -11,6 +11,7 @@
 [![GitHub Forks](https://img.shields.io/github/forks/InsaneCoder789/Trilingo.svg)](https://github.com/InsaneCoder789/Trilingo/network)
 
 **Currently Under Development 🚧**
+**Collaborative Project (InsaneCoder789 & prakhar-maheshwari18)
 
 <img width="1000" alt="Trilingo-Logo" src="github-banner.png">
 
